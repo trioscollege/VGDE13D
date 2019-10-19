@@ -27,8 +27,8 @@ public class PlanarReflectionEditor : Editor
     {
         GUILayout.Label ("Render planar reflections and use GrabPass for refractions", EditorStyles.miniBoldLabel);    	
     	
-		if(!SystemInfo.supportsRenderTextures)
-			EditorGUILayout.HelpBox("Realtime reflections not supported", MessageType.Warning);	
+		// if(!SystemInfo.supportsRenderTextures)
+		// EditorGUILayout.HelpBox("Realtime reflections not supported", MessageType.Warning);	
 		
     	serObj.Update();
     	
