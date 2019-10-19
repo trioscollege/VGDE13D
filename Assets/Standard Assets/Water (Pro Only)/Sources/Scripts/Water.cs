@@ -35,16 +35,19 @@ public class Water : MonoBehaviour
 	// camera will just work!
 	public void OnWillRenderObject()
 	{
-		if( !enabled || !GetComponent<Renderer>() || !GetComponent<Renderer>().sharedMaterial || !GetComponent<Renderer>().enabled )
+		if( !enabled || !GetComponent<Renderer>() || !GetComponent<Renderer>().sharedMaterial || !GetComponent<Renderer>().enabled ) {
 			return;
+		}
 			
 		Camera cam = Camera.current;
-		if( !cam )
+		if( !cam ) {
 			return;
+		}
 	
 		// Safeguard from recursive water reflections.		
-		if( s_InsideWater )
+		if( s_InsideWater ) { 
 			return;
+		}
 		s_InsideWater = true;
 		
 		// Actual water rendering mode depends on both the current setting AND
@@ -62,15 +65,15 @@ public class Water : MonoBehaviour
 		
 		// Optionally disable pixel lights for reflection/refraction
 		int oldPixelLightCount = QualitySettings.pixelLightCount;
-		if( m_DisablePixelLights )
+		if( m_DisablePixelLights ) {
 			QualitySettings.pixelLightCount = 0;
-		
+		}
+
 		UpdateCameraModes( cam, reflectionCamera );
 		UpdateCameraModes( cam, refractionCamera );
 		
 		// Render reflection if needed
-		if( mode >= WaterMode.Reflective )
-		{
+		if( mode >= WaterMode.Reflective ) {
 			// Reflect camera around reflection plane
 			float d = -Vector3.Dot (normal, pos) - m_ClipPlaneOffset;
 			Vector4 reflectionPlane = new Vector4 (normal.x, normal.y, normal.z, d);
@@ -90,19 +93,18 @@ public class Water : MonoBehaviour
 			
 			reflectionCamera.cullingMask = ~(1<<4) & m_ReflectLayers.value; // never render water layer
 			reflectionCamera.targetTexture = m_ReflectionTexture;
-			GL.SetRevertBackfacing (true);
+			GL.invertCulling = true;
 			reflectionCamera.transform.position = newpos;
 			Vector3 euler = cam.transform.eulerAngles;
 			reflectionCamera.transform.eulerAngles = new Vector3(-euler.x, euler.y, euler.z);
 			reflectionCamera.Render();
 			reflectionCamera.transform.position = oldpos;
-			GL.SetRevertBackfacing (false);
+			GL.invertCulling = false;
 			GetComponent<Renderer>().sharedMaterial.SetTexture( "_ReflectionTex", m_ReflectionTexture );
 		}
 		
 		// Render refraction
-		if( mode >= WaterMode.Refractive )
-		{
+		if( mode >= WaterMode.Refractive ) {
 			refractionCamera.worldToCameraMatrix = cam.worldToCameraMatrix;
 		
 			// Setup oblique projection matrix so that near plane is our reflection
@@ -121,12 +123,12 @@ public class Water : MonoBehaviour
 		}
 		
 		// Restore pixel light count
-		if( m_DisablePixelLights )
+		if( m_DisablePixelLights ) {
 			QualitySettings.pixelLightCount = oldPixelLightCount;
+		}
 		
 		// Setup shader keywords based on water mode
-		switch( mode )
-		{
+		switch( mode ) {
 		case WaterMode.Simple:
 			Shader.EnableKeyword( "WATER_SIMPLE" );
 			Shader.DisableKeyword( "WATER_REFLECTIVE" );
@@ -149,35 +151,41 @@ public class Water : MonoBehaviour
 	
 	
 	// Cleanup all the objects we possibly have created
-	void OnDisable()
-	{
+	void OnDisable() {
 		if( m_ReflectionTexture ) {
 			DestroyImmediate( m_ReflectionTexture );
 			m_ReflectionTexture = null;
 		}
+
 		if( m_RefractionTexture ) {
 			DestroyImmediate( m_RefractionTexture );
 			m_RefractionTexture = null;
 		}
-		foreach (KeyValuePair<Camera, Camera> kvp in m_ReflectionCameras)
-        	DestroyImmediate( (kvp.Value).gameObject );
+
+		foreach (KeyValuePair<Camera, Camera> kvp in m_ReflectionCameras) {
+			DestroyImmediate( (kvp.Value).gameObject );
+		}
+        	
         m_ReflectionCameras.Clear();
-		foreach (KeyValuePair<Camera, Camera> kvp in m_RefractionCameras)
+
+		foreach (KeyValuePair<Camera, Camera> kvp in m_RefractionCameras) {
         	DestroyImmediate( (kvp.Value).gameObject );
+		}
+
         m_RefractionCameras.Clear();
 	}
 	
 	
 	// This just sets up some matrices in the material; for really
 	// old cards to make water texture scroll.
-	void Update()
-	{
-		if( !GetComponent<Renderer>() )
+	void Update() {
+		if( !GetComponent<Renderer>() ) {
 			return;
+		}
 		Material mat = GetComponent<Renderer>().sharedMaterial;
-		if( !mat )
+		if( !mat ) {
 			return;
-			
+		}
 		Vector4 waveSpeed = mat.GetVector( "WaveSpeed" );
 		float waveScale = mat.GetFloat( "_WaveScale" );
 		Vector4 waveScale4 = new Vector4(waveScale, waveScale, waveScale * 0.4f, waveScale * 0.45f);
@@ -204,23 +212,19 @@ public class Water : MonoBehaviour
 		mat.SetMatrix( "_WaveMatrix2", scrollMatrix );
 	}
 	
-	private void UpdateCameraModes( Camera src, Camera dest )
-	{
-		if( dest == null )
+	private void UpdateCameraModes( Camera src, Camera dest ) {
+		if( dest == null ) {
 			return;
+		}
 		// set water camera to clear the same way as current camera
 		dest.clearFlags = src.clearFlags;
 		dest.backgroundColor = src.backgroundColor;		
-		if( src.clearFlags == CameraClearFlags.Skybox )
-		{
+		if( src.clearFlags == CameraClearFlags.Skybox ) {
 			Skybox sky = src.GetComponent(typeof(Skybox)) as Skybox;
 			Skybox mysky = dest.GetComponent(typeof(Skybox)) as Skybox;
-			if( !sky || !sky.material )
-			{
+			if( !sky || !sky.material ) {
 				mysky.enabled = false;
-			}
-			else
-			{
+			} else {
 				mysky.enabled = true;
 				mysky.material = sky.material;
 			}
@@ -237,20 +241,18 @@ public class Water : MonoBehaviour
 	}
 	
 	// On-demand create any objects we need for water
-	private void CreateWaterObjects( Camera currentCamera, out Camera reflectionCamera, out Camera refractionCamera )
-	{
+	private void CreateWaterObjects( Camera currentCamera, out Camera reflectionCamera, out Camera refractionCamera ) {
 		WaterMode mode = GetWaterMode();
 		
 		reflectionCamera = null;
 		refractionCamera = null;
 		
-		if( mode >= WaterMode.Reflective )
-		{
+		if( mode >= WaterMode.Reflective ) {
 			// Reflection render texture
-			if( !m_ReflectionTexture || m_OldReflectionTextureSize != m_TextureSize )
-			{
-				if( m_ReflectionTexture )
+			if( !m_ReflectionTexture || m_OldReflectionTextureSize != m_TextureSize ) {
+				if( m_ReflectionTexture ) {
 					DestroyImmediate( m_ReflectionTexture );
+				}
 				m_ReflectionTexture = new RenderTexture( m_TextureSize, m_TextureSize, 16 );
 				m_ReflectionTexture.name = "__WaterReflection" + GetInstanceID();
 				m_ReflectionTexture.isPowerOfTwo = true;
@@ -260,8 +262,7 @@ public class Water : MonoBehaviour
 			
 			// Camera for reflection
 			m_ReflectionCameras.TryGetValue(currentCamera, out reflectionCamera);
-			if (!reflectionCamera) // catch both not-in-dictionary and in-dictionary-but-deleted-GO
-			{
+			if (!reflectionCamera) {	// catch both not-in-dictionary and in-dictionary-but-deleted-GO
 				GameObject go = new GameObject( "Water Refl Camera id" + GetInstanceID() + " for " + currentCamera.GetInstanceID(), typeof(Camera), typeof(Skybox) );
 				reflectionCamera = go.GetComponent<Camera>();
 				reflectionCamera.enabled = false;
@@ -273,13 +274,12 @@ public class Water : MonoBehaviour
 			}
 		}
 		
-		if( mode >= WaterMode.Refractive )
-		{
+		if( mode >= WaterMode.Refractive ) {
 			// Refraction render texture
-			if( !m_RefractionTexture || m_OldRefractionTextureSize != m_TextureSize )
-			{
-				if( m_RefractionTexture )
+			if( !m_RefractionTexture || m_OldRefractionTextureSize != m_TextureSize ) {
+				if( m_RefractionTexture ) {
 					DestroyImmediate( m_RefractionTexture );
+				}
 				m_RefractionTexture = new RenderTexture( m_TextureSize, m_TextureSize, 16 );
 				m_RefractionTexture.name = "__WaterRefraction" + GetInstanceID();
 				m_RefractionTexture.isPowerOfTwo = true;
@@ -289,8 +289,7 @@ public class Water : MonoBehaviour
 			
 			// Camera for refraction
 			m_RefractionCameras.TryGetValue(currentCamera, out refractionCamera);
-			if (!refractionCamera) // catch both not-in-dictionary and in-dictionary-but-deleted-GO
-			{
+			if (!refractionCamera) {	// catch both not-in-dictionary and in-dictionary-but-deleted-GO
 				GameObject go = new GameObject( "Water Refr Camera id" + GetInstanceID() + " for " + currentCamera.GetInstanceID(), typeof(Camera), typeof(Skybox) );
 				refractionCamera = go.GetComponent<Camera>();
 				refractionCamera.enabled = false;
@@ -303,43 +302,48 @@ public class Water : MonoBehaviour
 		}
 	}
 	
-	private WaterMode GetWaterMode()
-	{
-		if( m_HardwareWaterSupport < m_WaterMode )
+	private WaterMode GetWaterMode() {
+		if( m_HardwareWaterSupport < m_WaterMode ) {
 			return m_HardwareWaterSupport;
-		else
+		} else {
 			return m_WaterMode;
+		}
 	}
 	
 	private WaterMode FindHardwareWaterSupport()
 	{
-		if( !SystemInfo.supportsRenderTextures || !GetComponent<Renderer>() )
+		if( !GetComponent<Renderer>() ) {
 			return WaterMode.Simple;
-			
+		}
+
 		Material mat = GetComponent<Renderer>().sharedMaterial;
-		if( !mat )
+		
+		if( !mat ) {
 			return WaterMode.Simple;
-			
+		}	
+
 		string mode = mat.GetTag("WATERMODE", false);
-		if( mode == "Refractive" )
+		
+		if( mode == "Refractive" ) {
 			return WaterMode.Refractive;
-		if( mode == "Reflective" )
+		}
+		
+		if( mode == "Reflective" ) {
 			return WaterMode.Reflective;
-			
+		}
+
 		return WaterMode.Simple;
 	}
 	
 	// Extended sign: returns -1, 0 or 1 based on sign of a
-	private static float sgn(float a)
-	{
+	private static float sgn(float a) {
         if (a > 0.0f) return 1.0f;
         if (a < 0.0f) return -1.0f;
         return 0.0f;
 	}
 	
 	// Given position/normal of the plane, calculates plane in camera space.
-	private Vector4 CameraSpacePlane (Camera cam, Vector3 pos, Vector3 normal, float sideSign)
-	{
+	private Vector4 CameraSpacePlane (Camera cam, Vector3 pos, Vector3 normal, float sideSign) {
 		Vector3 offsetPos = pos + normal * m_ClipPlaneOffset;
 		Matrix4x4 m = cam.worldToCameraMatrix;
 		Vector3 cpos = m.MultiplyPoint( offsetPos );
@@ -350,8 +354,7 @@ public class Water : MonoBehaviour
 	// Adjusts the given projection matrix so that near plane is the given clipPlane
 	// clipPlane is given in camera space. See article in Game Programming Gems 5 and
 	// http://aras-p.info/texts/obliqueortho.html
-	private static void CalculateObliqueMatrix (ref Matrix4x4 projection, Vector4 clipPlane)
-	{
+	private static void CalculateObliqueMatrix (ref Matrix4x4 projection, Vector4 clipPlane) {
 		Vector4 q = projection.inverse * new Vector4(
 			sgn(clipPlane.x),
 			sgn(clipPlane.y),
@@ -367,8 +370,7 @@ public class Water : MonoBehaviour
 	}
 
 	// Calculates reflection matrix around the given plane
-	private static void CalculateReflectionMatrix (ref Matrix4x4 reflectionMat, Vector4 plane)
-	{
+	private static void CalculateReflectionMatrix (ref Matrix4x4 reflectionMat, Vector4 plane) {
 	    reflectionMat.m00 = (1F - 2F*plane[0]*plane[0]);
 	    reflectionMat.m01 = (   - 2F*plane[0]*plane[1]);
 	    reflectionMat.m02 = (   - 2F*plane[0]*plane[2]);
