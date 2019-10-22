@@ -31,7 +31,7 @@ public class Patroller : MonoBehaviour
 	void Update () 
 	{
 		AnimatorStateInfo currentBaseState = animController.GetCurrentAnimatorStateInfo(0);
-		if(currentBaseState.nameHash != deadState)
+		if(currentBaseState.fullPathHash != deadState)
 		{
 			Transform target = character.GetAgroTarget();
 			if(target != null)
@@ -41,7 +41,7 @@ public class Patroller : MonoBehaviour
 				AnimatorStateInfo currentUpperTorsoState = animController.GetCurrentAnimatorStateInfo(1);
 				if(targetDirection.magnitude < attackRadius)
 				{				
-					if(currentUpperTorsoState.nameHash == attackState)
+					if(currentUpperTorsoState.fullPathHash == attackState)
 					{
 						animController.SetBool("attacking",false);
 						weaponHitBox.enabled = true;

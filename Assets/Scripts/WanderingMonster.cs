@@ -44,7 +44,7 @@ public class WanderingMonster : MonoBehaviour
 			NewHeading();
 						
 			AnimatorStateInfo currentBaseState = animController.GetCurrentAnimatorStateInfo(0);
-			if (currentBaseState.nameHash == crawlState)
+			if (currentBaseState.fullPathHash == crawlState)
 			{
 				moveDirection = transform.forward * speed;
 			}
@@ -61,7 +61,7 @@ public class WanderingMonster : MonoBehaviour
 			Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
 			
 			AnimatorStateInfo currentUpperTorsoState = animController.GetCurrentAnimatorStateInfo(1);
-			if(targetDirection.magnitude < attackRadius && currentUpperTorsoState.nameHash != attackState)
+			if(targetDirection.magnitude < attackRadius && currentUpperTorsoState.fullPathHash != attackState)
 			{				
 				animController.SetBool("attacking",true);
 				weaponHitBox.GetComponent<Collider>().enabled = true;
@@ -82,7 +82,7 @@ public class WanderingMonster : MonoBehaviour
 					
 					//if we are standing and ready to run
 					AnimatorStateInfo currentBaseState = animController.GetCurrentAnimatorStateInfo(0);
-					if (currentBaseState.nameHash == runState)
+					if (currentBaseState.fullPathHash == runState)
 					{
 						// Rotate from the current rotation towards the target rotation.
 						transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turningSpeed * Time.fixedTime);

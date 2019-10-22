@@ -154,7 +154,7 @@ public class RPGCharacterController : MonoBehaviour
 		
 		//is the player attacking?
 		AnimatorStateInfo currentUpperTorsoState  = animController.GetCurrentAnimatorStateInfo(1);
-		if(currentUpperTorsoState.nameHash == attackState )
+		if(currentUpperTorsoState.fullPathHash == attackState )
 		{
 			//enable the weapon's hitbox and reset the isAttacking Animator flag.
 			weaponHitBox.enabled = true;
