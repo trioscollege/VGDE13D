@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class RaceManager : MonoBehaviour 
 {
@@ -119,7 +120,7 @@ public class RaceManager : MonoBehaviour
 			if(carsFinished >= cars.Length || playerLaps >= requiredLaps)
 			{
 				print ("Player placed: " + (carsFinished+1));
-				Application.LoadLevel("RaceTrack");
+				SceneManager.LoadScene("RaceTrack");
 			}
 		}
 	}

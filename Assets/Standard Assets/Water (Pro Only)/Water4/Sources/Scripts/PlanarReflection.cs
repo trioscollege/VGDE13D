@@ -136,7 +136,7 @@ public class PlanarReflection : MonoBehaviour
 			}	
 		}
 							
-		GL.SetRevertBackfacing(true);		
+		GL.invertCulling = true; //TODO: Updated from GL.SetRevertBackfacing(true) - Obsolete code.
 							
 		Transform reflectiveSurface = transform; //waterHeight;
 			
@@ -170,7 +170,7 @@ public class PlanarReflection : MonoBehaviour
 														
 		reflectCamera.Render();	
 		
-		GL.SetRevertBackfacing(false);					
+		GL.invertCulling = false; //TODO: Updated from GL.SetRevertBackfacing(false) - Obsolete code.					
 	}
 	
 	private void SaneCameraSettings(Camera helperCam) 
