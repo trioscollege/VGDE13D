@@ -84,7 +84,7 @@ public class Car : MonoBehaviour
 		wheelTransformFL.localEulerAngles = new Vector3(wheelTransformFL.localEulerAngles.x, wheelFL.steerAngle - wheelTransformFL.localEulerAngles.z, wheelTransformFL.localEulerAngles.z);
 		wheelTransformFR.localEulerAngles = new Vector3(wheelTransformFR.localEulerAngles.x, wheelFR.steerAngle - wheelTransformFR.localEulerAngles.z, wheelTransformFR.localEulerAngles.z);
 	
-		UpdateWheelPositions();
+		// UpdateWheelPositions();
 	}
 	
 	void UpdateWheelPositions()
