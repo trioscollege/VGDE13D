@@ -12,16 +12,14 @@ public class RaceManager : MonoBehaviour
 	private Transform[] waypoint;
 	
 	// Use this for initialization
-	void Start () 
-	{
+	void Start() {
 		respawnTimes = new float[cars.Length];
 		distanceLeftToTravel = new float[cars.Length];
 		scripts = new CarController[cars.Length];
 		waypoint = new Transform[cars.Length];
 		
 		//intialize the arrays with starting values
-		for(int i=0; i < respawnTimes.Length; ++i)
-		{
+		for(int i=0; i < respawnTimes.Length; ++i) {
 			scripts[i] = cars[i].gameObject.GetComponent<CarController>();
 			respawnTimes[i] = respawnDelay;
 			distanceLeftToTravel[i] = float.MaxValue;
@@ -29,30 +27,23 @@ public class RaceManager : MonoBehaviour
 	}
 	
 	// Update is called once per frame
-	void Update () 
-	{
+	void Update() {
 		//check if any of the cars need a respawn.
-	 	for(int i = 0; i < cars.Length; ++i)
-		{
+	 	for(int i = 0; i < cars.Length; ++i) {
 			Transform nextWaypoint = scripts[i].GetCurrentWaypoint();
 			float distanceCovered = (nextWaypoint.position - cars[i].position).magnitude;
 			
 			//if the car has moved far enough or is now moving to a new waypoint reset its values.
-			if(distanceLeftToTravel[i] - distanceToCover > distanceCovered || waypoint[i] != nextWaypoint)
-			{
+			if(distanceLeftToTravel[i] - distanceToCover > distanceCovered || waypoint[i] != nextWaypoint) {
 				waypoint[i] = nextWaypoint;
 				respawnTimes[i] = respawnDelay;
 				distanceLeftToTravel[i] = distanceCovered;
-			}
-			//otherwise tick down time before we respawn it.
-			else
-			{
+			} else { //otherwise tick down time before we respawn it.
 				respawnTimes[i] -= Time.deltaTime;
 			}
 			
 			//if it's respawn timer has elapsed.
-			if(respawnTimes[i] <= 0)
-			{
+			if(respawnTimes[i] <= 0) {
 				//reset its respawn tracking variables
 				respawnTimes[i] = respawnDelay;
 				distanceLeftToTravel[i] = float.MaxValue;

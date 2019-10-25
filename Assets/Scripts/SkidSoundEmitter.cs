@@ -12,20 +12,17 @@ public class SkidSoundEmitter : MonoBehaviour
 	
 
 	// Use this for initialization
-	void Start () 
-	{
+	void Start() {
 		attachedWheel = transform.GetComponent<WheelCollider>();
 	}
 	
 	// Update is called once per frame
-	void Update () 
-	{
+	void Update() {
 		WheelHit hit;
-		if(attachedWheel.GetGroundHit(out hit))
-		{
+		if(attachedWheel.GetGroundHit(out hit)) {
 			float frictionValue = Mathf.Abs(hit.sidewaysSlip);
-			if(skidAt <= frictionValue && soundDelay <= 0)
-			{
+
+			if(skidAt <= frictionValue && soundDelay <= 0) {
 				AudioSource.PlayClipAtPoint(skidSound,hit.point);
 				soundDelay = 1f;
 			}
