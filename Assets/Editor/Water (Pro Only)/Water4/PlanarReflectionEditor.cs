@@ -48,10 +48,12 @@ public class PlanarReflectionEditor : Editor
 
         			if(i%2==1) {
         				EditorGUILayout.EndHorizontal();
-					}		
+					}
+
         			i = (i+1)%2;
         		}
-        	}	
+        	}
+			
         	if(i>0) {
 				EditorGUILayout.EndHorizontal();
 			}

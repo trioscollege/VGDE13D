@@ -15,20 +15,19 @@ public class WaterBaseEditor : Editor
 	public SerializedProperty waterQuality;
 	public SerializedProperty edgeBlend;	
     
-	public void OnEnable () 
-	{
+	public void OnEnable() {
 		serObj = new SerializedObject (target); 
 		sharedMaterial = serObj.FindProperty("sharedMaterial"); 
 		waterQuality = serObj.FindProperty("waterQuality");   		
 		edgeBlend = serObj.FindProperty("edgeBlend");   		
 	}
 	
-    public override void OnInspectorGUI () 
-    {		
+    public override void OnInspectorGUI() {		
     	serObj.Update();	
     	
     	waterBase = (WaterBase)serObj.targetObject;
     	oceanBase = ((WaterBase)serObj.targetObject).gameObject;
+
     	if(!oceanBase) {
       		return;
 		}
@@ -42,6 +41,7 @@ public class WaterBaseEditor : Editor
 			sharedMaterial.objectReferenceValue = (Object)WaterEditorUtility.LocateValidWaterMaterial(oceanBase.transform);		
 			serObj.ApplyModifiedProperties();
 	        oceanMaterial = (Material)sharedMaterial.objectReferenceValue;
+			
 			if (!oceanMaterial){
 				return;
 			}
@@ -167,12 +167,16 @@ public class WaterBaseEditor : Editor
 	    	GUILayout.Label ("Fading", EditorStyles.boldLabel);	
 			
 			fade.x = EditorGUILayout.Slider("Edge fade", fade.x, 0.001f, 3.0f);
-			if(hasShore)
-				fade.y = EditorGUILayout.Slider("Shore fade", fade.y, 0.001f, 3.0f);			
+
+			if(hasShore) {
+				fade.y = EditorGUILayout.Slider("Shore fade", fade.y, 0.001f, 3.0f);	
+			}
+					
 			fade.w = EditorGUILayout.Slider("Extinction fade", fade.w, 0.0f, 2.5f);			
 
 			WaterEditorUtility.SetMaterialVector("_InvFadeParemeter", fade, oceanMaterial);
 		}
+		
 		EditorGUILayout.Separator ();					
 								
 		if(oceanMaterial.HasProperty("_Foam")) {

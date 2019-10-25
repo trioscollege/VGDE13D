@@ -10,6 +10,7 @@ public class Water : MonoBehaviour
 		Reflective = 1,
 		Refractive = 2,
 	};
+
 	public WaterMode m_WaterMode = WaterMode.Refractive;
 	public bool m_DisablePixelLights = true;
 	public int m_TextureSize = 256;
@@ -33,8 +34,7 @@ public class Water : MonoBehaviour
 	// camera. We render reflections / refractions and do other updates here.
 	// Because the script executes in edit mode, reflections for the scene view
 	// camera will just work!
-	public void OnWillRenderObject()
-	{
+	public void OnWillRenderObject() {
 		if( !enabled || !GetComponent<Renderer>() || !GetComponent<Renderer>().sharedMaterial || !GetComponent<Renderer>().enabled ) {
 			return;
 		}
@@ -48,6 +48,7 @@ public class Water : MonoBehaviour
 		if( s_InsideWater ) { 
 			return;
 		}
+
 		s_InsideWater = true;
 		
 		// Actual water rendering mode depends on both the current setting AND
@@ -129,20 +130,22 @@ public class Water : MonoBehaviour
 		
 		// Setup shader keywords based on water mode
 		switch( mode ) {
-		case WaterMode.Simple:
-			Shader.EnableKeyword( "WATER_SIMPLE" );
-			Shader.DisableKeyword( "WATER_REFLECTIVE" );
-			Shader.DisableKeyword( "WATER_REFRACTIVE" );
+			case WaterMode.Simple:
+				Shader.EnableKeyword( "WATER_SIMPLE" );
+				Shader.DisableKeyword( "WATER_REFLECTIVE" );
+				Shader.DisableKeyword( "WATER_REFRACTIVE" );
 			break;
-		case WaterMode.Reflective:
-			Shader.DisableKeyword( "WATER_SIMPLE" );
-			Shader.EnableKeyword( "WATER_REFLECTIVE" );
-			Shader.DisableKeyword( "WATER_REFRACTIVE" );
+
+			case WaterMode.Reflective:
+				Shader.DisableKeyword( "WATER_SIMPLE" );
+				Shader.EnableKeyword( "WATER_REFLECTIVE" );
+				Shader.DisableKeyword( "WATER_REFRACTIVE" );
 			break;
-		case WaterMode.Refractive:
-			Shader.DisableKeyword( "WATER_SIMPLE" );
-			Shader.DisableKeyword( "WATER_REFLECTIVE" );
-			Shader.EnableKeyword( "WATER_REFRACTIVE" );
+
+			case WaterMode.Refractive:
+				Shader.DisableKeyword( "WATER_SIMPLE" );
+				Shader.DisableKeyword( "WATER_REFLECTIVE" );
+				Shader.EnableKeyword( "WATER_REFRACTIVE" );
 			break;
 		}
 			
@@ -182,7 +185,9 @@ public class Water : MonoBehaviour
 		if( !GetComponent<Renderer>() ) {
 			return;
 		}
+
 		Material mat = GetComponent<Renderer>().sharedMaterial;
+
 		if( !mat ) {
 			return;
 		}
@@ -216,12 +221,15 @@ public class Water : MonoBehaviour
 		if( dest == null ) {
 			return;
 		}
+
 		// set water camera to clear the same way as current camera
 		dest.clearFlags = src.clearFlags;
-		dest.backgroundColor = src.backgroundColor;		
+		dest.backgroundColor = src.backgroundColor;
+		
 		if( src.clearFlags == CameraClearFlags.Skybox ) {
 			Skybox sky = src.GetComponent(typeof(Skybox)) as Skybox;
 			Skybox mysky = dest.GetComponent(typeof(Skybox)) as Skybox;
+
 			if( !sky || !sky.material ) {
 				mysky.enabled = false;
 			} else {
@@ -277,9 +285,11 @@ public class Water : MonoBehaviour
 		if( mode >= WaterMode.Refractive ) {
 			// Refraction render texture
 			if( !m_RefractionTexture || m_OldRefractionTextureSize != m_TextureSize ) {
+
 				if( m_RefractionTexture ) {
 					DestroyImmediate( m_RefractionTexture );
 				}
+
 				m_RefractionTexture = new RenderTexture( m_TextureSize, m_TextureSize, 16 );
 				m_RefractionTexture.name = "__WaterRefraction" + GetInstanceID();
 				m_RefractionTexture.isPowerOfTwo = true;
@@ -337,8 +347,14 @@ public class Water : MonoBehaviour
 	
 	// Extended sign: returns -1, 0 or 1 based on sign of a
 	private static float sgn(float a) {
-        if (a > 0.0f) return 1.0f;
-        if (a < 0.0f) return -1.0f;
+        if (a > 0.0f) {
+			return 1.0f;
+		}
+
+        if (a < 0.0f) {
+			return -1.0f;
+		}
+		
         return 0.0f;
 	}
 	

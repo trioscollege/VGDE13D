@@ -21,7 +21,7 @@ public class PlanarReflection : MonoBehaviour
 	private Material sharedMaterial = null;
 	private Dictionary<Camera, bool> helperCameras = null;
 			
-	public void Start () {
+	public void Start() {
 		sharedMaterial = ((WaterBase)gameObject.GetComponent(typeof(WaterBase))).sharedMaterial;
 	}
 	
@@ -31,9 +31,9 @@ public class PlanarReflection : MonoBehaviour
 		
 		if(!go) {
 			go = new GameObject(reflName, typeof(Camera)); 
-		}	
+		}
 
-		if(!go.GetComponent(typeof(Camera))) {
+		if(!go.GetComponent(typeof(Camera))) { 
 			go.AddComponent(typeof(Camera));
 		}
 
@@ -47,7 +47,7 @@ public class PlanarReflection : MonoBehaviour
 		if(!reflectCamera.targetTexture) {
 			reflectCamera.targetTexture = CreateTextureFor(cam);
 		}
-		
+
 		return reflectCamera;
 	}
 	
@@ -76,7 +76,7 @@ public class PlanarReflection : MonoBehaviour
 			return;
 		}
 			
-		if(!reflectionCamera) {		
+		if(!reflectionCamera) {
 			reflectionCamera = CreateReflectionCameraFor(currentCam);
 		}
 
@@ -85,10 +85,10 @@ public class PlanarReflection : MonoBehaviour
 		helperCameras[currentCam] = true;
 	}
 	
-	public void LateUpdate () {
+	public void LateUpdate() {
 		if (null != helperCameras) {
-			helperCameras.Clear();
-		}		
+			helperCameras.Clear();	
+		}	
 	}
 	
 	public void WaterTileBeingRendered (Transform tr, Camera currentCam) {						
@@ -108,12 +108,12 @@ public class PlanarReflection : MonoBehaviour
 		Shader.EnableKeyword("WATER_SIMPLE");
 		Shader.DisableKeyword("WATER_REFLECTIVE");		
 	}
-		
-	
+
 	private void RenderReflectionFor (Camera cam, Camera reflectCamera) {
 		if(!reflectCamera) {
 			return;
-		}	
+		}
+
 		if(sharedMaterial && !sharedMaterial.HasProperty(reflectionSampler)) {
 			return;
 		}
@@ -127,9 +127,11 @@ public class PlanarReflection : MonoBehaviour
 		if(reflectSkybox) { 			
 			if(cam.gameObject.GetComponent(typeof(Skybox))) {
 				Skybox sb = (Skybox)reflectCamera.gameObject.GetComponent(typeof(Skybox));
-				if (!sb) {
+
+				if(!sb) {
 					sb = (Skybox)reflectCamera.gameObject.AddComponent(typeof(Skybox));
 				}
+
 				sb.material = ((Skybox)cam.GetComponent(typeof(Skybox))).material;				
 			}	
 		}
@@ -220,8 +222,14 @@ public class PlanarReflection : MonoBehaviour
 	}
 	
 	static float sgn (float a) {
-	       if (a > 0.0F) return 1.0F;
-	       if (a < 0.0F) return -1.0F;
+		if (a > 0.0F) { 
+			return 1.0F;
+		}
+
+		if (a < 0.0F) {
+			return -1.0F;
+		}
+
 	       return 0.0F;
 	}	
 	
