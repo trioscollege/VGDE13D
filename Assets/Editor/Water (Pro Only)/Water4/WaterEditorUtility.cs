@@ -31,20 +31,21 @@ class WaterEditorUtility
 		mat.SetTexture(theName, parameter);
 	} 	 
 	
-	public static Material LocateValidWaterMaterial(Transform parent) 
-	{
-		if(parent.GetComponent<Renderer>() && parent.GetComponent<Renderer>().sharedMaterial)
+	public static Material LocateValidWaterMaterial(Transform parent) {
+		if(parent.GetComponent<Renderer>() && parent.GetComponent<Renderer>().sharedMaterial) {
 			return parent.GetComponent<Renderer>().sharedMaterial;
-		foreach( Transform t in parent)
-		{
-			if(t.GetComponent<Renderer>() && t.GetComponent<Renderer>().sharedMaterial)
-				return t.GetComponent<Renderer>().sharedMaterial;
 		}
+
+		foreach( Transform t in parent) {
+			if(t.GetComponent<Renderer>() && t.GetComponent<Renderer>().sharedMaterial) {
+				return t.GetComponent<Renderer>().sharedMaterial;
+			}
+		}
+
 		return null;
 	}
 	
-	public static void CurveGui (System.String name, SerializedObject serObj, Color color) 
-	{
+	public static void CurveGui (System.String name, SerializedObject serObj, Color color) {
 		AnimationCurve curve = new AnimationCurve(new Keyframe(0, 0.0f, 1.0f, 1.0f), new Keyframe(1, 1.0f, 1.0f, 1.0f));
         curve = EditorGUILayout.CurveField(new GUIContent (name), curve, color, new Rect (0.0f,0.0f,1.0f,1.0f));
    

@@ -15,7 +15,7 @@ public class PlanarReflectionEditor : Editor
 
 	bool showKidsWithReflectionHint = false;
     
-	public void OnEnable () {
+	public void OnEnable() {
 		serObj = new SerializedObject (target); 
 		
 		reflectionMask = serObj.FindProperty("reflectionMask");   		
@@ -23,8 +23,7 @@ public class PlanarReflectionEditor : Editor
 		clearColor = serObj.FindProperty("clearColor");   		
 	}
 	
-    public override void OnInspectorGUI () 
-    {
+    public override void OnInspectorGUI() {
         GUILayout.Label ("Render planar reflections and use GrabPass for refractions", EditorStyles.miniBoldLabel);    	
     	
 		// if(!SystemInfo.supportsRenderTextures)
@@ -40,18 +39,26 @@ public class PlanarReflectionEditor : Editor
         if (showKidsWithReflectionHint) {
         	int i = 0;
         	foreach(Transform t in ((PlanarReflection)target).transform) {
-        		if (t.GetComponent<WaterTile>())	{
-        			if(i%2==0)
+        		if(t.GetComponent<WaterTile>())	{
+        			if(i%2 == 0) {
         				EditorGUILayout.BeginHorizontal();
+					}
+
         			EditorGUILayout.ObjectField(t, typeof(Transform), true);
-        			if(i%2==1)
-        				EditorGUILayout.EndHorizontal();        			
+        			
+					if(i%2 == 1) {
+        				EditorGUILayout.EndHorizontal();  
+					}      		
+
         			i = (i+1)%2;
         		}
-        	}	
-        	if(i>0)
-				EditorGUILayout.EndHorizontal();        			        		
+        	}
+			
+			if(i>0){
+				EditorGUILayout.EndHorizontal();
+			}
         }
+		
         EditorGUILayout.EndToggleGroup();		
     	
     	serObj.ApplyModifiedProperties();
