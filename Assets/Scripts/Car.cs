@@ -33,8 +33,7 @@ public class Car : MonoBehaviour
 	private float currentSpeed;
 	private float gearSpread;
 	
-	void Start()
-	{
+	void Start() {
 		//calculate the spread of top speed over the number of gears.
 		gearSpread = topSpeed / numberOfGears;
 		
@@ -42,8 +41,7 @@ public class Car : MonoBehaviour
 		GetComponent<Rigidbody>().centerOfMass += centerOfMassAdjustment;
 	}
 	
-	void SetSlipValues(float forward, float sideways)
-	{
+	void SetSlipValues(float forward, float sideways) {
 		WheelFrictionCurve tempStruct = wheelBR.forwardFriction;
 		tempStruct.stiffness = forward;
 		wheelBR.forwardFriction = tempStruct;
@@ -60,22 +58,18 @@ public class Car : MonoBehaviour
 	}
 	
 	// FixedUpdate is called once per physics frame
-	void FixedUpdate () 
-	{
+	void FixedUpdate() {
 		//front wheel steering
 		wheelFL.steerAngle = Input.GetAxis("Horizontal") * maxTurnAngle;
 		wheelFR.steerAngle = Input.GetAxis("Horizontal")* maxTurnAngle;
 		
 		//calculate max speed in KM/H (optimized calc)
 		currentSpeed = wheelBL.radius*wheelBL.rpm*Mathf.PI*0.12f;
-		if(currentSpeed < topSpeed && currentSpeed > maxReverseSpeed)
-		{
+		if(currentSpeed < topSpeed && currentSpeed > maxReverseSpeed) {
 			//rear wheel drive.
 			wheelBL.motorTorque = Input.GetAxis("Vertical") * maxTorque;
 			wheelBR.motorTorque = Input.GetAxis("Vertical") * maxTorque;
-		}
-		else
-		{
+		} else {
 			//can't go faster, already at top speed that engine produces.
 			wheelBL.motorTorque = 0;
 			wheelBR.motorTorque = 0;
@@ -86,22 +80,17 @@ public class Car : MonoBehaviour
 		GetComponent<Rigidbody>().AddForce(-transform.up * (localVelocity.z * spoilerRatio),ForceMode.Impulse);
 		
 		//Handbrake controls
-		if(Input.GetButton("Jump"))
-		{
+		if(Input.GetButton("Jump")) {
 			applyHandbrake = true;
 			wheelFL.brakeTorque = maxBrakeTorque;
 			wheelFR.brakeTorque = maxBrakeTorque;
-			if(GetComponent<Rigidbody>().velocity.magnitude > 1)
-			{
+			
+			if(GetComponent<Rigidbody>().velocity.magnitude > 1) {
 				SetSlipValues(handbrakeForwardSlip, handbrakeSidewaysSlip);
-			}
-			else
-			{
+			} else {
 				SetSlipValues(1f,1f);
 			}
-		}
-		else
-		{
+		} else {
 			applyHandbrake = false;
 			wheelFL.brakeTorque = 0;
 			wheelFR.brakeTorque = 0;
@@ -109,55 +98,47 @@ public class Car : MonoBehaviour
 		}
 		
 		//apply deceleration when not pressing the gas or when breaking in either direction.
-		if( !applyHandbrake && ((Input.GetAxis("Vertical") <= -0.5f && localVelocity.z > 0)||(Input.GetAxis("Vertical") >= 0.5f && localVelocity.z < 0)))
-		{
+		if( !applyHandbrake && ((Input.GetAxis("Vertical") <= -0.5f && localVelocity.z > 0)||(Input.GetAxis("Vertical") >= 0.5f && localVelocity.z < 0))) {
 			wheelBL.brakeTorque = decelerationTorque + maxTorque;
 			wheelBR.brakeTorque = decelerationTorque + maxTorque;
-		}
-		else if(!applyHandbrake && Input.GetAxis("Vertical") == 0)
-		{
+		} else if(!applyHandbrake && Input.GetAxis("Vertical") == 0) {
 			wheelBL.brakeTorque = decelerationTorque;
 			wheelBR.brakeTorque = decelerationTorque;
-		}
-		else
-		{
+		} else {
 			wheelBL.brakeTorque = 0;
 			wheelBR.brakeTorque = 0;
 		}
 	}
 	
-	void UpdateWheelPositions()
-	{
+	void UpdateWheelPositions() {
 		//move wheels based on their suspension.
 		WheelHit contact = new WheelHit();
-		if(wheelFL.GetGroundHit(out contact))
-		{
+		if(wheelFL.GetGroundHit(out contact)) {
 			Vector3 temp = wheelFL.transform.position;
 			temp.y = (contact.point + (wheelFL.transform.up*wheelFL.radius)).y;
 			wheelTransformFL.position = temp;
 		}
-		if(wheelFR.GetGroundHit(out contact))
-		{
+
+		if(wheelFR.GetGroundHit(out contact)) {
 			Vector3 temp = wheelFR.transform.position;
 			temp.y = (contact.point + (wheelFR.transform.up*wheelFR.radius)).y;
 			wheelTransformFR.position = temp;
 		}
-		if(wheelBL.GetGroundHit(out contact))
-		{
+
+		if(wheelBL.GetGroundHit(out contact)) {
 			Vector3 temp = wheelBL.transform.position;
 			temp.y = (contact.point + (wheelBL.transform.up*wheelBL.radius)).y;
 			wheelTransformBL.position = temp;
 		}
-		if(wheelBR.GetGroundHit(out contact))
-		{
+
+		if(wheelBR.GetGroundHit(out contact)) {
 			Vector3 temp = wheelBR.transform.position;
 			temp.y = (contact.point + (wheelBR.transform.up*wheelBR.radius)).y;
 			wheelTransformBR.position = temp;
 		}
 	}
 	
-	void Update()
-	{
+	void Update() {
 		//rotate the wheels based on RPM
 		float rotationThisFrame = 360*Time.deltaTime;
 		wheelTransformFL.Rotate(wheelFL.rpm/rotationThisFrame,0,0);
@@ -179,12 +160,10 @@ public class Car : MonoBehaviour
 		EngineSound();
 	}
 	
-	void DetermineBreakLightState()
-	{
+	void DetermineBreakLightState() {
 		if((currentSpeed > 0 && Input.GetAxis("Vertical") < 0) 
 			|| (currentSpeed < 0 && Input.GetAxis("Vertical") > 0)
-			|| applyHandbrake)
-		{
+			|| applyHandbrake) {
 			leftBrakeLight.GetComponent<Renderer>().material.mainTexture = brakeLightTex;
 			Light leftLight = leftBrakeLight.GetComponentInChildren<Light>();
 			leftLight.color = Color.red;
@@ -193,9 +172,7 @@ public class Car : MonoBehaviour
 			Light rightLight = rightBrakeLight.GetComponentInChildren<Light>();
 			rightLight.color = Color.red;
 			rightLight.intensity = 1;
-		}
-		else if(currentSpeed < 0 && Input.GetAxis("Vertical") < 0)
-		{
+		} else if(currentSpeed < 0 && Input.GetAxis("Vertical") < 0) {
 			leftBrakeLight.GetComponent<Renderer>().material.mainTexture = reverseLightTex;
 			Light leftLight = leftBrakeLight.GetComponentInChildren<Light>();
 			leftLight.color = Color.white;
@@ -204,9 +181,7 @@ public class Car : MonoBehaviour
 			Light rightLight = rightBrakeLight.GetComponentInChildren<Light>();
 			rightLight.color = Color.white;
 			rightLight.intensity = 1;
-		}
-		else
-		{
+		} else {
 			leftBrakeLight.GetComponent<Renderer>().material.mainTexture = idleLightTex;
 			Light leftLight = leftBrakeLight.GetComponentInChildren<Light>();
 			leftLight.color = Color.white;
@@ -219,29 +194,20 @@ public class Car : MonoBehaviour
 		}
 	}
 	
-	void EngineSound()
-	{
+	void EngineSound() {
 		//going forward calculate how far along that gear we are and the pitch sound.
-		if(currentSpeed > 0)
-		{
-			if(currentSpeed > topSpeed)
-			{
+		if(currentSpeed > 0) {
+			if(currentSpeed > topSpeed) {
 				GetComponent<AudioSource>().pitch = 1.75f;
-			}
-			else
-			{
+			} else {
 				GetComponent<AudioSource>().pitch = ((currentSpeed % gearSpread) / gearSpread) + 0.75f;
 			}
-		}
-		//when reversing we have only one gear.
-		else
-		{
+		} else { //when reversing we have only one gear.
 			GetComponent<AudioSource>().pitch = (currentSpeed / maxReverseSpeed) + 0.75f;
 		}
 	}
 	
-	void OnGUI()
-	{
+	void OnGUI() {
 		GUI.DrawTexture(new Rect(Screen.width-300,Screen.height-150,300,150),speedometer);
 		float speedFactor=currentSpeed/topSpeed;
 		float rotationAngle = Mathf.Lerp(0,180,Mathf.Abs(speedFactor));	
