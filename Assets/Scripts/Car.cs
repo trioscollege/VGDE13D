@@ -16,8 +16,8 @@ public class Car : MonoBehaviour
 	public WheelCollider wheelBR;
 	public Transform wheelTransformFL;
 	public Transform wheelTransformFR;
-	public Transform wheelTransformBL;
-	public Transform wheelTransformBR;
+	public Transform wheelTransformRL;
+	public Transform wheelTransformRR;
 	private Rigidbody body;
 
 	void Start() {
@@ -67,8 +67,8 @@ public class Car : MonoBehaviour
 		float rotationThisFrame = 360*Time.deltaTime;
 		wheelTransformFL.Rotate(wheelFL.rpm/rotationThisFrame,0,0);
 		wheelTransformFR.Rotate(wheelFR.rpm/rotationThisFrame,0,0);
-		wheelTransformBL.Rotate(wheelBL.rpm/rotationThisFrame,0,0);
-		wheelTransformBR.Rotate(wheelBR.rpm/rotationThisFrame,0,0);
+		wheelTransformRL.Rotate(wheelBL.rpm/rotationThisFrame,0,0);
+		wheelTransformRR.Rotate(wheelBR.rpm/rotationThisFrame,0,0);
 		
 		//turn the wheels according to steering. But make sure you take into account the rotation being applied above.
 		wheelTransformFL.localEulerAngles = new Vector3(wheelTransformFL.localEulerAngles.x, wheelFL.steerAngle - wheelTransformFL.localEulerAngles.z, wheelTransformFL.localEulerAngles.z);
@@ -93,12 +93,12 @@ public class Car : MonoBehaviour
 		if(wheelBL.GetGroundHit(out contact)) {
 			Vector3 temp = wheelBL.transform.position;
 			temp.y = (contact.point + (wheelBL.transform.up*wheelBL.radius)).y;
-			wheelTransformBL.position = temp;
+			wheelTransformRL.position = temp;
 		}
 		if(wheelBR.GetGroundHit(out contact)) {
 			Vector3 temp = wheelBR.transform.position;
 			temp.y = (contact.point + (wheelBR.transform.up*wheelBR.radius)).y;
-			wheelTransformBR.position = temp;
+			wheelTransformRR.position = temp;
 		}
 	}
 }
