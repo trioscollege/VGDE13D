@@ -16,12 +16,12 @@ public class Car : MonoBehaviour
 	public float handbrakeSidewaysSlip = 0.08f;
 	public WheelCollider wheelFL;
 	public WheelCollider wheelFR;
-	public WheelCollider wheelBL;
-	public WheelCollider wheelBR;
+	public WheelCollider wheelRL;
+	public WheelCollider wheelRR;
 	public Transform wheelTransformFL;
 	public Transform wheelTransformFR;
-	public Transform wheelTransformBL;
-	public Transform wheelTransformBR;
+	public Transform wheelTransformRL;
+	public Transform wheelTransformRR;
 	public GameObject leftBrakeLight;
 	public GameObject rightBrakeLight;
 	public Texture2D idleLightTex;
@@ -40,19 +40,19 @@ public class Car : MonoBehaviour
 	}
 	
 	void SetSlipValues(float forward, float sideways) {
-		WheelFrictionCurve tempStruct = wheelBR.forwardFriction;
+		WheelFrictionCurve tempStruct = wheelRR.forwardFriction;
 		tempStruct.stiffness = forward;
-		wheelBR.forwardFriction = tempStruct;
-		tempStruct = wheelBR.sidewaysFriction;
+		wheelRR.forwardFriction = tempStruct;
+		tempStruct = wheelRR.sidewaysFriction;
 		tempStruct.stiffness = sideways;
-		wheelBR.sidewaysFriction = tempStruct;
+		wheelRR.sidewaysFriction = tempStruct;
 		
-		tempStruct = wheelBL.forwardFriction;
+		tempStruct = wheelRL.forwardFriction;
 		tempStruct.stiffness = forward;
-		wheelBL.forwardFriction = tempStruct;
-		tempStruct = wheelBL.sidewaysFriction;
+		wheelRL.forwardFriction = tempStruct;
+		tempStruct = wheelRL.sidewaysFriction;
 		tempStruct.stiffness = sideways;
-		wheelBL.sidewaysFriction = tempStruct;
+		wheelRL.sidewaysFriction = tempStruct;
 	}
 	
 	// FixedUpdate is called once per physics frame
@@ -62,16 +62,16 @@ public class Car : MonoBehaviour
 		wheelFR.steerAngle = Input.GetAxis("Horizontal")* maxTurnAngle;
 		
 		//calculate max speed in KM/H (optimized calc)
-		currentSpeed = wheelBL.radius*wheelBL.rpm*Mathf.PI*0.12f;
+		currentSpeed = wheelRL.radius*wheelRL.rpm*Mathf.PI*0.12f;
 		
 		if(currentSpeed < topSpeed && currentSpeed > maxReverseSpeed) {
 			//rear wheel drive.
-			wheelBL.motorTorque = Input.GetAxis("Vertical") * maxTorque;
-			wheelBR.motorTorque = Input.GetAxis("Vertical") * maxTorque;
+			wheelRL.motorTorque = Input.GetAxis("Vertical") * maxTorque;
+			wheelRR.motorTorque = Input.GetAxis("Vertical") * maxTorque;
 		} else {
 			//can't go faster, already at top speed that engine produces.
-			wheelBL.motorTorque = 0;
-			wheelBR.motorTorque = 0;
+			wheelRL.motorTorque = 0;
+			wheelRR.motorTorque = 0;
 		}
 		
 		//Spoilers add down pressure based on the car’s speed. (Upside-down lift)
@@ -99,14 +99,14 @@ public class Car : MonoBehaviour
 		
 		//apply deceleration when not pressing the gas or when breaking in either direction.
 		if( !applyHandbrake && ((Input.GetAxis("Vertical") <= -0.5f && localVelocity.z > 0)||(Input.GetAxis("Vertical") >= 0.5f && localVelocity.z < 0))) {
-			wheelBL.brakeTorque = decelerationTorque + maxTorque;
-			wheelBR.brakeTorque = decelerationTorque + maxTorque;
+			wheelRL.brakeTorque = decelerationTorque + maxTorque;
+			wheelRR.brakeTorque = decelerationTorque + maxTorque;
 		} else if(!applyHandbrake && Input.GetAxis("Vertical") == 0) {
-			wheelBL.brakeTorque = decelerationTorque;
-			wheelBR.brakeTorque = decelerationTorque;
+			wheelRL.brakeTorque = decelerationTorque;
+			wheelRR.brakeTorque = decelerationTorque;
 		} else {
-			wheelBL.brakeTorque = 0;
-			wheelBR.brakeTorque = 0;
+			wheelRL.brakeTorque = 0;
+			wheelRR.brakeTorque = 0;
 		}
 	}
 	
@@ -126,16 +126,16 @@ public class Car : MonoBehaviour
 			wheelTransformFR.position = temp;
 		}
 
-		if(wheelBL.GetGroundHit(out contact)) {
-			Vector3 temp = wheelBL.transform.position;
-			temp.y = (contact.point + (wheelBL.transform.up*wheelBL.radius)).y;
-			wheelTransformBL.position = temp;
+		if(wheelRL.GetGroundHit(out contact)) {
+			Vector3 temp = wheelRL.transform.position;
+			temp.y = (contact.point + (wheelRL.transform.up*wheelRL.radius)).y;
+			wheelTransformRL.position = temp;
 		}
 
-		if(wheelBR.GetGroundHit(out contact)) {
-			Vector3 temp = wheelBR.transform.position;
-			temp.y = (contact.point + (wheelBR.transform.up*wheelBR.radius)).y;
-			wheelTransformBR.position = temp;
+		if(wheelRR.GetGroundHit(out contact)) {
+			Vector3 temp = wheelRR.transform.position;
+			temp.y = (contact.point + (wheelRR.transform.up*wheelRR.radius)).y;
+			wheelTransformRR.position = temp;
 		}
 	}
 	
@@ -144,8 +144,8 @@ public class Car : MonoBehaviour
 		float rotationThisFrame = 360*Time.deltaTime;
 		wheelTransformFL.Rotate(wheelFL.rpm/rotationThisFrame,0,0);
 		wheelTransformFR.Rotate(wheelFR.rpm/rotationThisFrame,0,0);
-		wheelTransformBL.Rotate(wheelBL.rpm/rotationThisFrame,0,0);
-		wheelTransformBR.Rotate(wheelBR.rpm/rotationThisFrame,0,0);
+		wheelTransformRL.Rotate(wheelRL.rpm/rotationThisFrame,0,0);
+		wheelTransformRR.Rotate(wheelRR.rpm/rotationThisFrame,0,0);
 		
 		//turn the wheels according to steering. But make sure you take into account the rotation being applied above.
 		wheelTransformFL.localEulerAngles = new Vector3(wheelTransformFL.localEulerAngles.x, wheelFL.steerAngle - wheelTransformFL.localEulerAngles.z, wheelTransformFL.localEulerAngles.z);
