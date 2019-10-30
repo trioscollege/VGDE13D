@@ -162,36 +162,18 @@ public class Car : MonoBehaviour
 	}
 	
 	void DetermineBreakLightState() {
-		if((currentSpeed > 0 && Input.GetAxis("Vertical") < 0) 
-			|| (currentSpeed < 0 && Input.GetAxis("Vertical") > 0)
-			|| applyHandbrake) {
-			leftBrakeLight.GetComponent<Renderer>().material.mainTexture = brakeLightTex;
-			Light leftLight = leftBrakeLight.GetComponentInChildren<Light>();
-			leftLight.color = Color.red;
-			leftLight.intensity = 1;
-			rightBrakeLight.GetComponent<Renderer>().material.mainTexture = brakeLightTex;
-			Light rightLight = rightBrakeLight.GetComponentInChildren<Light>();
-			rightLight.color = Color.red;
-			rightLight.intensity = 1;
-		} else if(currentSpeed < 0 && Input.GetAxis("Vertical") < 0) {
-			leftBrakeLight.GetComponent<Renderer>().material.mainTexture = reverseLightTex;
-			Light leftLight = leftBrakeLight.GetComponentInChildren<Light>();
-			leftLight.color = Color.white;
-			leftLight.intensity = 1;
-			rightBrakeLight.GetComponent<Renderer>().material.mainTexture = reverseLightTex;
-			Light rightLight = rightBrakeLight.GetComponentInChildren<Light>();
-			rightLight.color = Color.white;
-			rightLight.intensity = 1;
-		} else {
-			leftBrakeLight.GetComponent<Renderer>().material.mainTexture = idleLightTex;
-			Light leftLight = leftBrakeLight.GetComponentInChildren<Light>();
-			leftLight.color = Color.white;
-			leftLight.intensity = 0;
-			rightBrakeLight.GetComponent<Renderer>().material.mainTexture = idleLightTex;
-			Light rightLight = rightBrakeLight.GetComponentInChildren<Light>();
-			rightLight.color = Color.white;
-			rightLight.intensity = 0;
-		}
+		if((currentSpeed > 0 && Input.GetAxis("Vertical") < 0) || 
+			(currentSpeed < 0 && Input.GetAxis("Vertical") > 0) || 
+				applyHandbrake) {
+            leftBrakeLight.GetComponent<Renderer>().material.mainTexture = brakeLightTex;
+            rightBrakeLight.GetComponent<Renderer>().material.mainTexture = brakeLightTex;
+        } else if(currentSpeed < 0 && Input.GetAxis("Vertical") < 0) {
+            leftBrakeLight.GetComponent<Renderer>().material.mainTexture = reverseLightTex;
+            rightBrakeLight.GetComponent<Renderer>().material.mainTexture = reverseLightTex;
+        } else {
+            leftBrakeLight.GetComponent<Renderer>().material.mainTexture = idleLightTex;
+            rightBrakeLight.GetComponent<Renderer>().material.mainTexture = idleLightTex;
+        }
 	}
 	
 	void EngineSound() {

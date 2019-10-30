@@ -14,8 +14,7 @@ public class SkidEnabler : MonoBehaviour
 
 	void Update() 
 	{
-		if(wheelCollider.forwardFriction.stiffness < 1 && wheelCollider.isGrounded)
-		{
+		if(wheelCollider.forwardFriction.stiffness < 1 && wheelCollider.isGrounded) {
 			if(skidMark.time == 0) {
 				skidMark.time = skidLife;
 				skidTrailRenderer.transform.parent = wheelCollider.transform;
