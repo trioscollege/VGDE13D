@@ -7,13 +7,11 @@ public class GerstnerDisplaceEditor : Editor
 {    
     private SerializedObject serObj;
 
-	public void OnEnable () 
-	{
+	public void OnEnable() {
 		serObj = new SerializedObject (target);
 	}
 	
-    public override void OnInspectorGUI () 
-    {
+    public override void OnInspectorGUI() {
     	serObj.Update(); 
     	
     	GameObject go = ((GerstnerDisplace)serObj.targetObject).gameObject;
@@ -22,8 +20,7 @@ public class GerstnerDisplaceEditor : Editor
     	
         GUILayout.Label ("Animates vertices using up 4 generated waves", EditorStyles.miniBoldLabel);    
         
-		if(sharedWaterMaterial) 
-		{			
+		if(sharedWaterMaterial) {			
 			Vector4 amplitude = WaterEditorUtility.GetMaterialVector("_GAmplitude", sharedWaterMaterial);
 			Vector4 frequency = WaterEditorUtility.GetMaterialVector("_GFrequency", sharedWaterMaterial);
 			Vector4 steepness = WaterEditorUtility.GetMaterialVector("_GSteepness", sharedWaterMaterial);

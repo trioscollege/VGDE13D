@@ -29,23 +29,19 @@ public class RaceManager : MonoBehaviour
 	
 	private static RaceManager instance = null;
 	
-	void Awake()
-	{
-		if (instance != null && instance != this)
-		{
+	void Awake() {
+		if (instance != null && instance != this) {
 			Destroy(this.gameObject);
 			return;        
-		} 
-		else 
-		{
+		} else {
 			instance = this;
 		}
+
 		CountdownTimerReset(5);
 	}
 	
 	// Use this for initialization
-	void Start () 
-	{
+	void Start() {
 		respawnTimes = new float[cars.Length];
 		distanceLeftToTravel = new float[cars.Length];
 		scripts = new CarController[cars.Length];
@@ -53,8 +49,7 @@ public class RaceManager : MonoBehaviour
 		laps = new int[cars.Length];
 		
 		//intialize the arrays with starting values
-		for(int i=0; i < respawnTimes.Length; ++i)
-		{
+		for(int i=0; i < respawnTimes.Length; ++i) {
 			scripts[i] = cars[i].gameObject.GetComponent<CarController>();
 			respawnTimes[i] = respawnDelay;
 			distanceLeftToTravel[i] = float.MaxValue;
@@ -69,36 +64,28 @@ public class RaceManager : MonoBehaviour
 	}
 	
 	// Update is called once per frame
-	void Update () 
-	{
+	void Update() {
 		//if the race has started...
-		if(started)
-		{
+		if(started) {
 			//counter that tracks finished cars.
 			int carsFinished=0;
 			
 			//check if any of the cars need a respawn.
-		 	for(int i = 0; i < cars.Length; ++i)
-			{
+		 	for(int i = 0; i < cars.Length; ++i) {
 				Transform nextWaypoint = scripts[i].GetCurrentWaypoint();
 				float distanceCovered = (nextWaypoint.position - cars[i].position).magnitude;
 				
 				//if the car has moved far enough or is now moving to a new waypoint reset its values.
-				if(distanceLeftToTravel[i] - distanceToCover > distanceCovered || waypoint[i] != nextWaypoint)
-				{
+				if(distanceLeftToTravel[i] - distanceToCover > distanceCovered || waypoint[i] != nextWaypoint) {
 					waypoint[i] = nextWaypoint;
 					respawnTimes[i] = respawnDelay;
 					distanceLeftToTravel[i] = distanceCovered;
-				}
-				//otherwise tick down time before we respawn it.
-				else
-				{
+				} else { //otherwise tick down time before we respawn it.
 					respawnTimes[i] -= Time.deltaTime;
 				}
 				
 				//if it's respawn timer has elapsed.
-				if(respawnTimes[i] <= 0)
-				{
+				if(respawnTimes[i] <= 0) {
 					//reset its respawn tracking variables
 					respawnTimes[i] = respawnDelay;
 					distanceLeftToTravel[i] = float.MaxValue;
@@ -110,28 +97,23 @@ public class RaceManager : MonoBehaviour
 				}
 				
 				//count the cars that have finished the race.
-				if(laps[i] >= requiredLaps)
-				{
+				if(laps[i] >= requiredLaps) {
 					carsFinished++;
 				}
 			}
 			
 			//if all the cars finish their laps or the player does load the race track.
-			if(carsFinished >= cars.Length || playerLaps >= requiredLaps)
-			{
+			if(carsFinished >= cars.Length || playerLaps >= requiredLaps) {
 				print ("Player placed: " + (carsFinished+1));
 				SceneManager.LoadScene("RaceTrack");
 			}
 		}
 	}
 	
-	public void LapFinishedByAI(CarController script)
-	{
+	public void LapFinishedByAI(CarController script) {
 		//search through and find the car that communicated with us.
-		for(int i=0; i < respawnTimes.Length; ++i)
-		{
-			if(scripts[i] == script)
-			{
+		for(int i=0; i < respawnTimes.Length; ++i) {
+			if(scripts[i] == script) {
 				//increment its lap counter
 				laps[i]++;
 				break;
@@ -139,8 +121,7 @@ public class RaceManager : MonoBehaviour
 		}
 	}
 	
-	void OnGUI()
-	{
+	void OnGUI() {
 		GUILayout.BeginArea(new Rect(0, 0, Screen.width, Screen.height));
     	GUILayout.FlexibleSpace();
 		GUILayout.BeginHorizontal();
@@ -152,54 +133,48 @@ public class RaceManager : MonoBehaviour
 		GUILayout.EndArea();	
 	}
 	
-	void CountdownTimerReset(int delayInSeconds)
-	{
+	void CountdownTimerReset(int delayInSeconds) {
 		countdownTimerDelay = delayInSeconds;
 		countdownTimerStartTime = Time.time;
 	}
 	
-	int CountdownTimerSecondsRemaining()
-	{
+	int CountdownTimerSecondsRemaining() {
 		int elapsedSeconds = (int) (Time.time - countdownTimerStartTime);
 		int secondsLeft = (countdownTimerDelay - elapsedSeconds);
 		return secondsLeft;
 	}
 	
-	Texture2D CountdownTimerImage()
-	{
-		switch(CountdownTimerSecondsRemaining())
-		{
-		case 3:
-			return digit3Image;
-			
-		case 2:
-			return digit2Image;
-			
-		case 1:
-			return digit1Image;
-			
-		case 0:
-			//start the race!
-			for(int i=0; i < scripts.Length; ++i)
-			{
-				cars[i].isKinematic = false;
-				player.isKinematic = false;
-				started = true;
-			}
-			return startRaceImage;
+	Texture2D CountdownTimerImage() {
+		switch(CountdownTimerSecondsRemaining()) {
+			case 3:
+				return digit3Image;
+				
+			case 2:
+				return digit2Image;
+				
+			case 1:
+				return digit1Image;
+				
+			case 0:
+				//start the race!
+				for(int i=0; i < scripts.Length; ++i) {
+					cars[i].isKinematic = false;
+					player.isKinematic = false;
+					started = true;
+				}
+				return startRaceImage;
 
-		default:
-			return null;
+			default:
+				return null;
 		}
 	}
 	
-	public void PlayerCheckPoint(CheckPoint point)
-	{
-		if(point == checkPoints[currentCheckPoint])
-		{
+	public void PlayerCheckPoint(CheckPoint point) {
+		if(point == checkPoints[currentCheckPoint]) {
+			
 			currentCheckPoint++;
-			if(currentCheckPoint >= checkPoints.Length)
-			{
+
+			if(currentCheckPoint >= checkPoints.Length) {
 				currentCheckPoint = 0;
 				playerLaps++;
 			}

@@ -15,23 +15,23 @@ public class WaterBaseEditor : Editor
 	public SerializedProperty waterQuality;
 	public SerializedProperty edgeBlend;	
     
-	public void OnEnable () 
-	{
+	public void OnEnable() {
 		serObj = new SerializedObject (target); 
 		sharedMaterial = serObj.FindProperty("sharedMaterial"); 
 		waterQuality = serObj.FindProperty("waterQuality");   		
 		edgeBlend = serObj.FindProperty("edgeBlend");   		
 	}
 	
-    public override void OnInspectorGUI () 
-    {		
+    public override void OnInspectorGUI() {		
     	serObj.Update();	
     	
     	waterBase = (WaterBase)serObj.targetObject;
     	oceanBase = ((WaterBase)serObj.targetObject).gameObject;
-    	if(!oceanBase) 
+    	
+		if(!oceanBase) {
       		return;
-    	    	
+    	}
+
         GUILayout.Label ("This script helps adjusting water material properties", EditorStyles.miniBoldLabel);
     	    	
     	EditorGUILayout.PropertyField(sharedMaterial, new GUIContent("Material"));
@@ -41,8 +41,10 @@ public class WaterBaseEditor : Editor
 			sharedMaterial.objectReferenceValue = (Object)WaterEditorUtility.LocateValidWaterMaterial(oceanBase.transform);		
 			serObj.ApplyModifiedProperties();
 	        oceanMaterial = (Material)sharedMaterial.objectReferenceValue;
-			if (!oceanMaterial)
+			
+			if (!oceanMaterial) {
 				return;
+			}
 		}
 		
 		EditorGUILayout.Separator ();
@@ -51,10 +53,13 @@ public class WaterBaseEditor : Editor
    		EditorGUILayout.PropertyField(waterQuality, new GUIContent("Quality"));
    		EditorGUILayout.PropertyField(edgeBlend, new GUIContent("Edge blend?"));    
 		
-		if(waterQuality.intValue > (int)WaterQuality.Low) //&& !SystemInfo.supportsRenderTextures)
+		if(waterQuality.intValue > (int)WaterQuality.Low) {
 			EditorGUILayout.HelpBox("Water features not supported", MessageType.Warning);
-		if(edgeBlend.boolValue && !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth))
+		}
+		
+		if(edgeBlend.boolValue && !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth)) {
 			EditorGUILayout.HelpBox("Edge blend not supported", MessageType.Warning);
+		}
 		
 		EditorGUILayout.Separator ();
 		
@@ -72,9 +77,11 @@ public class WaterBaseEditor : Editor
         GUILayout.Label ("Used for small waves (bumps), foam and white caps", EditorStyles.miniBoldLabel);
     	       
 		WaterEditorUtility.SetMaterialTexture("_BumpMap",(Texture)EditorGUILayout.ObjectField("Normals", WaterEditorUtility.GetMaterialTexture("_BumpMap", waterBase.sharedMaterial), typeof(Texture), false), waterBase.sharedMaterial);  
-		if (hasShore)
+		
+		if (hasShore) {
 			WaterEditorUtility.SetMaterialTexture("_ShoreTex", (Texture)EditorGUILayout.ObjectField("Shore & Foam", WaterEditorUtility.GetMaterialTexture("_ShoreTex", waterBase.sharedMaterial), typeof(Texture), false), waterBase.sharedMaterial);  
-
+		}
+		
 		Vector4 animationTiling;
 		Vector4 animationDirection;
 		
@@ -139,12 +146,11 @@ public class WaterBaseEditor : Editor
 			if(oceanMaterial.HasProperty("_FresnelScale")) {
 				float fresnelScale = EditorGUILayout.Slider("Intensity", WaterEditorUtility.GetMaterialFloat("_FresnelScale", oceanMaterial), 0.1F, 4.0F);
 				WaterEditorUtility.SetMaterialFloat("_FresnelScale", fresnelScale, oceanMaterial);
-			}			
+			}
+			
 			displacementParameter.z = EditorGUILayout.Slider("Power", displacementParameter.z, 0.1F, 10.0F);
 			displacementParameter.w = EditorGUILayout.Slider("Bias", displacementParameter.w, -3.0F, 3.0F);
-		}
-		else
-		{
+		} else {
 			Texture fresnelTex = (Texture)EditorGUILayout.ObjectField(
 					"Ramp", 
 					(Texture)WaterEditorUtility.GetMaterialTexture("_Fresnel", 
@@ -154,17 +160,19 @@ public class WaterBaseEditor : Editor
 			WaterEditorUtility.SetMaterialTexture("_Fresnel", fresnelTex, oceanMaterial);
 		}
 		
-		EditorGUILayout.Separator ();
+		EditorGUILayout.Separator();
 		    			
 		WaterEditorUtility.SetMaterialVector("_DistortParams", displacementParameter, oceanMaterial);
 			
-		if (edgeBlend.boolValue)
-		{
+		if (edgeBlend.boolValue) {
 	    	GUILayout.Label ("Fading", EditorStyles.boldLabel);	
 			
 			fade.x = EditorGUILayout.Slider("Edge fade", fade.x, 0.001f, 3.0f);
-			if(hasShore)
-				fade.y = EditorGUILayout.Slider("Shore fade", fade.y, 0.001f, 3.0f);			
+
+			if(hasShore) {
+				fade.y = EditorGUILayout.Slider("Shore fade", fade.y, 0.001f, 3.0f);
+			}	
+			
 			fade.w = EditorGUILayout.Slider("Extinction fade", fade.w, 0.0f, 2.5f);			
 
 			WaterEditorUtility.SetMaterialVector("_InvFadeParemeter", fade, oceanMaterial);
