@@ -1,0 +1,35 @@
+ManifestFileVersion: 0
+CRC: 409420314
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 245fcee8c685e09161434f02efc0b523
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 7cfb71639c64b78933b756e29c4b7b00
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 135
+  Script: {instanceID: 0}
+- Class: 136
+  Script: {instanceID: 0}
+Assets:
+- Assets/Prefabs/Cube.prefab
+- Assets/Prefabs/Cylinder.prefab
+- Assets/Prefabs/Sphere.prefab
+Dependencies:
+- D:/GameDev/_TriOs/AssetBundlesExample/AssetBundles/StandaloneWindows/materials

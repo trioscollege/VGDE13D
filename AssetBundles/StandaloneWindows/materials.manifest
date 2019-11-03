@@ -1,0 +1,20 @@
+ManifestFileVersion: 0
+CRC: 2279089122
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 2e2e362ff52a8877fd9cd64310f5d9f3
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: a15026e7645264409a88f84f584030a1
+HashAppended: 0
+ClassTypes:
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+Assets:
+- Assets/Materials/Red.mat
+- Assets/Materials/Blue.mat
+- Assets/Materials/Green.mat
+Dependencies: []
