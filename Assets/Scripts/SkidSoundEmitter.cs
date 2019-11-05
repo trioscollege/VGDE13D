@@ -4,7 +4,7 @@ using System.Collections;
 [RequireComponent(typeof(WheelCollider))]
 public class SkidSoundEmitter : MonoBehaviour 
 {
-	public float skidAt = 1.5f;
+	public float skidAt = 0.1f;
 	public int soundEmissionPerSecond = 10;
 	public AudioClip skidSound;
 	private float soundDelay;
