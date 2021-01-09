@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 
-[RequireComponent(typeof(CarController))]
+[RequireComponent(typeof(CarController_old))]
 [RequireComponent(typeof(AudioSource))]
 public class CarEngine : MonoBehaviour
 {

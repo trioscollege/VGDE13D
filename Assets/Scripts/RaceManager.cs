@@ -9,7 +9,7 @@ public class RaceManager : MonoBehaviour
     public float m_distanceToCover = 1.0f;
     public GameObject m_checkpointContainer;
 
-    private AICar[] m_aiControllers;
+    private AICar_old[] m_aiControllers;
     private float[] m_respawnTimes;
     private float[] m_distancesLeftToTravel;
     private Transform[] m_waypoints;
@@ -105,10 +105,10 @@ public class RaceManager : MonoBehaviour
                 m_player.rotation = resetLocation.rotation;
             }
 
-            if ((m_carsFinished == m_aiRacers.Length || m_playerLaps == m_requiredLaps) && !m_player.GetComponent<PlayerCar>().Finished)
+            if ((m_carsFinished == m_aiRacers.Length || m_playerLaps == m_requiredLaps) && !m_player.GetComponent<PlayerCar_old>().Finished)
             {
-                m_player.gameObject.GetComponent<PlayerCar>().Finished = true;
-                m_player.gameObject.GetComponent<PlayerCar>().enabled = false;
+                m_player.gameObject.GetComponent<PlayerCar_old>().Finished = true;
+                m_player.gameObject.GetComponent<PlayerCar_old>().enabled = false;
                 //m_player.gameObject.GetComponent<AICar>().enabled = true;
                 //m_player.gameObject.GetComponent<AICar>().Finished = true;
                 Debug.Log("Player placed: " + (m_carsFinished + 1));
@@ -117,7 +117,7 @@ public class RaceManager : MonoBehaviour
         }
     }
 
-    public void LapCompletedByAI(AICar car)
+    public void LapCompletedByAI(AICar_old car)
     {
         bool found = false;
         for (int i = 0; i < m_aiControllers.Length && !found; i++)
@@ -222,7 +222,7 @@ public class RaceManager : MonoBehaviour
 
     private void InitializeArrays()
     {
-        m_aiControllers = new AICar[m_aiRacers.Length];
+        m_aiControllers = new AICar_old[m_aiRacers.Length];
         m_distancesLeftToTravel = new float[m_aiRacers.Length];
         m_waypoints = new Transform[m_aiRacers.Length];
         m_checkpoints = m_checkpointContainer.GetComponentsInChildren<CheckpointTrigger>();
@@ -231,7 +231,7 @@ public class RaceManager : MonoBehaviour
 
         for (int i = 0; i < m_aiRacers.Length; i++)
         {
-            m_aiControllers[i] = m_aiRacers[i].GetComponentInChildren<AICar>();
+            m_aiControllers[i] = m_aiRacers[i].GetComponentInChildren<AICar_old>();
             m_respawnTimes[i] = m_respawnDelay;
             m_distancesLeftToTravel[i] = float.MaxValue;
             m_aiLaps[i] = 0;

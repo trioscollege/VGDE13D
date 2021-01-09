@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class AICar : CarController
+public class AICar_old : CarController_old
 {
     public Transform m_waypointContainer;
     [Tooltip("The distance, in units, a car must be to a waypoint to 'arrive'.")]
