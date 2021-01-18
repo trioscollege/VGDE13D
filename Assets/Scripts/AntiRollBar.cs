@@ -5,7 +5,7 @@ public class AntiRollBar : MonoBehaviour
 {
     public WheelCollider m_leftWheel;
     public WheelCollider m_rightWheel;
-    public float m_antiRoll = 5000.0f;
+    public float m_maxAntiRollForce = 5000.0f;
     private Rigidbody m_rigidbody;
 
     void Awake()
@@ -31,7 +31,7 @@ public class AntiRollBar : MonoBehaviour
             rightTravel = (-m_rightWheel.transform.InverseTransformPoint(hit.point).y - m_rightWheel.radius) / m_rightWheel.suspensionDistance;
         }
 
-        float antiRollForce = (leftTravel - rightTravel) * m_antiRoll;
+        float antiRollForce = (leftTravel - rightTravel) * m_maxAntiRollForce;
 
         if (isLeftGrounded)
         {

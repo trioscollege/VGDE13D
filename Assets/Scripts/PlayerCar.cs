@@ -15,5 +15,8 @@ public class PlayerCar : CarController
         {
             m_wheelColliders[i].steerAngle = Input.GetAxis("Horizontal") * m_maxSteerAngle;
         }
+
+        Vector3 localVelocity = transform.InverseTransformDirection(m_body.velocity);
+        m_body.AddForce(-transform.up * (localVelocity.z * m_spoilerRatio), ForceMode.Force);
     }
 }
