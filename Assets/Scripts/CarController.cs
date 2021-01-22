@@ -4,9 +4,13 @@
 public class CarController : MonoBehaviour
 {
     // properties
-    public float m_maxTorque = 100.0f;
-    public float m_maxSteerAngle = 25.0f;
-    public Vector3 m_centerOfMassOffset = new Vector3(0.0f, 0.2f, 0.4f);
+    public float m_maxSpeed = 200.0f;
+    protected float m_currentSpeed = 0.0f;
+    public float m_maxTorque = 2500.0f;
+    public float m_brakingTorque = 1875.0f;
+    protected float m_appliedBrakeTorque = 0.0f;
+    public float m_maxSteerAngle = 45.0f;
+    public Vector3 m_centerOfMassOffset = new Vector3(0.0f, 0.3f, 0.6f);
     public float m_spoilerRatio = 0.15f;
 
     // containers
@@ -80,5 +84,10 @@ public class CarController : MonoBehaviour
                 m_wheelMeshes[i].position = tempPos;
             }
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawSphere(transform.TransformPoint(m_centerOfMassOffset), 0.25f);
     }
 }

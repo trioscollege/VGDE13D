@@ -3,8 +3,8 @@
 public class ChaseCamera : MonoBehaviour
 {
     public Transform m_chaseTarget;
-    public float m_distance;
-    public float m_height;
+    public float m_distance = 7.0f;
+    public float m_height = 3.0f;
     public float m_rotationDamping = 3.0f;
     public float m_heightDamping = 2.0f;
     private float m_desiredAngle = 0.0f;
