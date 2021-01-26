@@ -77,10 +77,14 @@ public class CarController : MonoBehaviour
 
         for (int i = 0; i < m_wheelMeshes.Length; i++)
         {
+            // check for contact with "ground"
             if (m_wheelColliders[i].GetGroundHit(out contact))
             {
+                // sample the current position of the collider
                 Vector3 tempPos = m_wheelColliders[i].transform.position;
+                // translate the position up from the point of contact, using collider radius for scaling
                 tempPos.y = (contact.point + (m_wheelColliders[i].transform.up * m_wheelColliders[i].radius)).y;
+                // place mesh "axel:" at new position
                 m_wheelMeshes[i].position = tempPos;
             }
         }
