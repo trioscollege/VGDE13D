@@ -35,16 +35,14 @@ public class PlayerCar : CarController
 
         // decelerating / braking
         bool torqueChange = false;
-        if ((Input.GetAxis("Vertical") < 0 && localVelocity.z > 0 ||
-            Input.GetAxis("Vertical") > 0 && localVelocity.z < 0) &&
-            m_appliedBrakeTorque != m_brakingTorque + m_maxTorque)
+        if (((Input.GetAxis("Vertical") < 0 && localVelocity.z > 0 ||
+            Input.GetAxis("Vertical") > 0 && localVelocity.z < 0)))
         {
             m_appliedBrakeTorque = m_brakingTorque + m_maxTorque;
             torqueChange = true;
         }
         // no acceleration input
-        else if (Input.GetAxis("Vertical") == 0 &&
-            m_appliedBrakeTorque != m_brakingTorque)
+        else if (Input.GetAxis("Vertical") == 0)
         {
             m_appliedBrakeTorque = m_brakingTorque;
             torqueChange = true;
@@ -53,6 +51,29 @@ public class PlayerCar : CarController
         {
             m_appliedBrakeTorque = 0.0f;
             torqueChange = true;
+        }
+
+        // check for handbrake
+        if (Input.GetButton("Handbrake"))
+        {
+            m_handBraking = true;
+            m_appliedBrakeTorque = m_brakingTorque + m_maxTorque;
+            torqueChange = true;
+            if (m_body.velocity.sqrMagnitude > 0)
+            {
+                SetStiffness(
+                    m_handbrakeForwardStiffness, 
+                    m_handbrakeSidewayStiffness);
+            }
+            else
+            {
+                SetStiffness(1.0f, 1.0f);
+            }
+        }
+        else
+        {
+            m_handBraking = false;
+            SetStiffness(1.0f, 1.0f);
         }
 
         if (torqueChange)

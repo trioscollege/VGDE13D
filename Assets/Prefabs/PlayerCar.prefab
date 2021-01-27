@@ -545,6 +545,8 @@ MonoBehaviour:
   m_maxSteerAngle: 45
   m_centerOfMassOffset: {x: 0, y: 0.3, z: 0.2}
   m_spoilerRatio: 0.15
+  m_handbrakeForwardStiffness: 0.8
+  m_handbrakeSidewayStiffness: 0.4
   m_colliderContainer: {fileID: 6578229793027556085}
   m_meshContainer: {fileID: 92683006453542333}
 --- !u!114 &5357859304123455203

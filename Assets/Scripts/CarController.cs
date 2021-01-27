@@ -12,6 +12,9 @@ public class CarController : MonoBehaviour
     public float m_maxSteerAngle = 45.0f;
     public Vector3 m_centerOfMassOffset = new Vector3(0.0f, 0.3f, 0.6f);
     public float m_spoilerRatio = 0.15f;
+    public float m_handbrakeForwardStiffness = 0.8f;
+    public float m_handbrakeSidewayStiffness = 0.4f;
+    protected bool m_handBraking = false;
 
     // containers
     public GameObject m_colliderContainer;
@@ -50,6 +53,23 @@ public class CarController : MonoBehaviour
 
         UpdateWheelPositions();
     }
+
+    protected void SetStiffness(float foreSlip, float sideSlip)
+    {
+        // rear wheels only, start at index 2
+        for (int i = 2; i < m_wheelColliders.Length; i++)
+        {
+            WheelCollider wc = m_wheelColliders[i];
+            WheelFrictionCurve frictionCurve = wc.forwardFriction;
+            frictionCurve.stiffness = foreSlip;
+            wc.forwardFriction = frictionCurve;
+
+            frictionCurve = wc.sidewaysFriction;
+            frictionCurve.stiffness = sideSlip;
+            wc.sidewaysFriction = frictionCurve;
+        }
+    }
+
 
     private void GetWheelColliders()
     {
