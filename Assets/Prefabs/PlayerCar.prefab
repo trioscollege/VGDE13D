@@ -105,6 +105,7 @@ GameObject:
   m_Component:
   - component: {fileID: 355197030281847079}
   - component: {fileID: 355197030281847078}
+  - component: {fileID: 438045710}
   m_Layer: 0
   m_Name: RL_WheelCollider
   m_TagString: Untagged
@@ -156,6 +157,20 @@ WheelCollider:
     m_AsymptoteValue: 1.333
     m_Stiffness: 1
   m_Enabled: 1
+--- !u!114 &438045710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 355197030281847076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c432baa34f129eb4a80d25ff82a7f34b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_stiffnessThreshold: 1
+  m_placementOffset: 0.01
 --- !u!1 &355197030589423021
 GameObject:
   m_ObjectHideFlags: 0
@@ -227,6 +242,7 @@ GameObject:
   m_Component:
   - component: {fileID: 355197030819654990}
   - component: {fileID: 355197030819654985}
+  - component: {fileID: 1005765212}
   m_Layer: 0
   m_Name: RR_WheelCollider
   m_TagString: Untagged
@@ -278,6 +294,20 @@ WheelCollider:
     m_AsymptoteValue: 1.333
     m_Stiffness: 1
   m_Enabled: 1
+--- !u!114 &1005765212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 355197030819654991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c432baa34f129eb4a80d25ff82a7f34b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_stiffnessThreshold: 1
+  m_placementOffset: 0.01
 --- !u!1 &6578229793027556085
 GameObject:
   m_ObjectHideFlags: 0

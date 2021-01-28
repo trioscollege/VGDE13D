@@ -2,7 +2,7 @@
 
 public class PlayerCar : CarController
 {
-    void FixedUpdate()
+    void Update()
     {
         Vector3 localVelocity = transform.InverseTransformDirection(m_body.velocity);
         // convert from m/s to km/h
