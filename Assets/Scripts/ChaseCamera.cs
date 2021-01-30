@@ -29,8 +29,11 @@ public class ChaseCamera : MonoBehaviour
         // Verify m_chaseTarget has a rigidbody
         if (m_rigidbody)
         {
+            Vector3 localVelocity =
+                m_chaseTarget.InverseTransformDirection(
+                    m_rigidbody.velocity);
             // Verify local z velocity is less than -0.5f
-            if (m_chaseTarget.InverseTransformDirection(m_rigidbody.velocity).z < -0.5f)
+            if (localVelocity.z < -0.5f)
             {
                 m_desiredAngle += 180.0f;
             }

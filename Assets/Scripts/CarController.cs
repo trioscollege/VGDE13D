@@ -15,27 +15,37 @@ public class CarController : MonoBehaviour
     public float m_handbrakeForwardStiffness = 0.8f;
     public float m_handbrakeSidewayStiffness = 0.4f;
     protected bool m_handBraking = false;
+    protected bool m_braking = false;
+    protected bool m_reversing = false;
 
     // containers
     public GameObject m_colliderContainer;
     public GameObject m_meshContainer;
+    public GameObject m_brakeLightsContainer;
 
     // car parts
     protected WheelCollider[] m_wheelColliders;
     protected Rigidbody m_body;
     protected Transform[] m_wheelMeshes;
+    protected Renderer[] m_brakeLightRenderers;
+
+    protected Texture2D m_lightsIdleTex;
+    protected Texture2D m_lightsBrakeTex;
+    protected Texture2D m_lightsReverseTex;
 
     private void Awake()
     {
         GetWheelColliders();
         GetWheelMeshes();
+        GetBrakeLightRenderers();
+        LoadBrakeTextures();
 
         // offset center of mass for roll-over resistance
         m_body = GetComponent<Rigidbody>();
         m_body.centerOfMass += m_centerOfMassOffset;
     }
 
-    private void Update()
+    protected void Update()
     {
         for (int i = 0; i < m_wheelMeshes.Length; i++)
         {
@@ -52,6 +62,7 @@ public class CarController : MonoBehaviour
         }
 
         UpdateWheelPositions();
+        UpdateBrakeLightState();
     }
 
     protected void SetStiffness(float foreSlip, float sideSlip)
@@ -110,8 +121,40 @@ public class CarController : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
+    private void UpdateBrakeLightState()
     {
-        Gizmos.DrawSphere(transform.TransformPoint(m_centerOfMassOffset), 0.25f);
+        if (m_braking || m_handBraking)
+        {
+            foreach (Renderer r in m_brakeLightRenderers)
+            {
+                r.material.mainTexture = m_lightsBrakeTex;
+            }
+        }
+        else if (m_reversing)
+        {
+            foreach (Renderer r in m_brakeLightRenderers)
+            {
+                r.material.mainTexture = m_lightsReverseTex;
+            }
+        }
+        else
+        {
+            foreach (Renderer r in m_brakeLightRenderers)
+            {
+                r.material.mainTexture = m_lightsIdleTex;
+            }
+        }
+    }
+
+    private void GetBrakeLightRenderers()
+    {
+        m_brakeLightRenderers = m_brakeLightsContainer.GetComponentsInChildren<Renderer>();
+    }
+
+    private void LoadBrakeTextures()
+    {
+        m_lightsIdleTex = Resources.Load<Texture2D>("Vehicle/LightsIdle");
+        m_lightsBrakeTex = Resources.Load<Texture2D>("Vehicle/LightsBrake");
+        m_lightsReverseTex = Resources.Load<Texture2D>("Vehicle/LightsReverse");
     }
 }

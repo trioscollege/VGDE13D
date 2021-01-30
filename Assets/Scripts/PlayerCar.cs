@@ -2,7 +2,7 @@
 
 public class PlayerCar : CarController
 {
-    void Update()
+    private new void Update()
     {
         Vector3 localVelocity = transform.InverseTransformDirection(m_body.velocity);
         // convert from m/s to km/h
@@ -35,22 +35,26 @@ public class PlayerCar : CarController
 
         // decelerating / braking
         bool torqueChange = false;
-        if (((Input.GetAxis("Vertical") < 0 && localVelocity.z > 0 ||
-            Input.GetAxis("Vertical") > 0 && localVelocity.z < 0)))
+        if ((Input.GetAxis("Vertical") < 0 && localVelocity.z > 0) ||
+            (Input.GetAxis("Vertical") > 0 && localVelocity.z < 0))
         {
             m_appliedBrakeTorque = m_brakingTorque + m_maxTorque;
             torqueChange = true;
+            m_braking = true;
         }
         // no acceleration input
         else if (Input.GetAxis("Vertical") == 0)
         {
             m_appliedBrakeTorque = m_brakingTorque;
             torqueChange = true;
+            m_braking = true;
         }
         else
         {
             m_appliedBrakeTorque = 0.0f;
             torqueChange = true;
+            m_braking = false;
+            m_reversing = localVelocity.z < 0;
         }
 
         // check for handbrake
@@ -83,5 +87,6 @@ public class PlayerCar : CarController
                 m_wheelColliders[i].brakeTorque = m_appliedBrakeTorque;
             }
         }
+        base.Update();
     }
 }
