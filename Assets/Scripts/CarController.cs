@@ -5,18 +5,28 @@ public class CarController : MonoBehaviour
 {
     // properties
     public float m_maxSpeed = 200.0f;
-    protected float m_currentSpeed = 0.0f;
     public float m_maxTorque = 2500.0f;
     public float m_brakingTorque = 1875.0f;
-    protected float m_appliedBrakeTorque = 0.0f;
     public float m_maxSteerAngle = 45.0f;
     public Vector3 m_centerOfMassOffset = new Vector3(0.0f, 0.3f, 0.6f);
     public float m_spoilerRatio = 0.15f;
     public float m_handbrakeForwardStiffness = 0.8f;
     public float m_handbrakeSidewayStiffness = 0.4f;
+    public int m_numberOfGears = 5;
+    public float m_revolutionsBoundary = 1.0f;
+
+    protected float m_appliedBrakeTorque = 0.0f;
     protected bool m_handBraking = false;
     protected bool m_braking = false;
     protected bool m_reversing = false;
+    protected int m_currentGear = 1;
+
+    public float AccelerationInput { get; protected set; }
+    public float CurrentSpeed { get; protected set; }
+    public float TopSpeed { get { return m_maxSpeed; } }
+    public int NumberOfGears { get { return m_numberOfGears; } }
+    public int CurrentGear { get { return m_currentGear; } set { m_currentGear = value; } }
+    public float Revolutions { get; set; }
 
     // containers
     public GameObject m_colliderContainer;
@@ -108,14 +118,11 @@ public class CarController : MonoBehaviour
 
         for (int i = 0; i < m_wheelMeshes.Length; i++)
         {
-            // check for contact with "ground"
             if (m_wheelColliders[i].GetGroundHit(out contact))
             {
-                // sample the current position of the collider
                 Vector3 tempPos = m_wheelColliders[i].transform.position;
                 // translate the position up from the point of contact, using collider radius for scaling
                 tempPos.y = (contact.point + (m_wheelColliders[i].transform.up * m_wheelColliders[i].radius)).y;
-                // place mesh "axel:" at new position
                 m_wheelMeshes[i].position = tempPos;
             }
         }

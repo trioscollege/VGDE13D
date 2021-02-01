@@ -83,9 +83,9 @@ WheelCollider:
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
-    m_ExtremumSlip: 0.001
+    m_ExtremumSlip: 1
     m_ExtremumValue: 1.5
-    m_AsymptoteSlip: 0.002
+    m_AsymptoteSlip: 2
     m_AsymptoteValue: 0.75
     m_Stiffness: 1
   m_SidewaysFriction:
@@ -145,9 +145,9 @@ WheelCollider:
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
-    m_ExtremumSlip: 0.001
+    m_ExtremumSlip: 1
     m_ExtremumValue: 1.5
-    m_AsymptoteSlip: 0.002
+    m_AsymptoteSlip: 2
     m_AsymptoteValue: 0.75
     m_Stiffness: 1
   m_SidewaysFriction:
@@ -220,9 +220,9 @@ WheelCollider:
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
-    m_ExtremumSlip: 0.001
+    m_ExtremumSlip: 1
     m_ExtremumValue: 1.5
-    m_AsymptoteSlip: 0.002
+    m_AsymptoteSlip: 2
     m_AsymptoteValue: 0.75
     m_Stiffness: 1
   m_SidewaysFriction:
@@ -282,9 +282,9 @@ WheelCollider:
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
-    m_ExtremumSlip: 0.001
+    m_ExtremumSlip: 1
     m_ExtremumValue: 1.5
-    m_AsymptoteSlip: 0.002
+    m_AsymptoteSlip: 2
     m_AsymptoteValue: 0.75
     m_Stiffness: 1
   m_SidewaysFriction:
@@ -739,6 +739,7 @@ GameObject:
   - component: {fileID: 5357859304123455207}
   - component: {fileID: 5357859304123455203}
   - component: {fileID: 5357859304123455201}
+  - component: {fileID: 1928708326}
   m_Layer: 0
   m_Name: PlayerCar
   m_TagString: Untagged
@@ -796,10 +797,12 @@ MonoBehaviour:
   m_maxTorque: 2500
   m_brakingTorque: 2000
   m_maxSteerAngle: 45
-  m_centerOfMassOffset: {x: 0, y: 0.3, z: 0.2}
+  m_centerOfMassOffset: {x: 0, y: 0, z: 0}
   m_spoilerRatio: 0.15
   m_handbrakeForwardStiffness: 0.8
   m_handbrakeSidewayStiffness: 0.4
+  m_numberOfGears: 5
+  m_revolutionsBoundary: 1
   m_colliderContainer: {fileID: 6578229793027556085}
   m_meshContainer: {fileID: 92683006453542333}
   m_brakeLightsContainer: {fileID: 4466232645201295580}
@@ -833,6 +836,27 @@ MonoBehaviour:
   m_leftWheel: {fileID: 355197030281847078}
   m_rightWheel: {fileID: 355197030819654985}
   m_maxAntiRollForce: 50000
+--- !u!114 &1928708326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7109177081566022340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f2abf3a7a4e9234296b94318ea5c261, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_accelClip: {fileID: 8300000, guid: ee68262e7a73a4c4b8e940ecd2330b7b, type: 3}
+  m_pitchMultiplier: 1
+  m_lowPitchMin: 1
+  m_lowPitchMax: 6
+  m_highPitchMultiplier: 0.25
+  m_maxRolloffDistance: 500
+  m_dopplerLevel: 1
+  m_useDoppler: 1
+  m_revRangeBoundary: 0.7
 --- !u!1 &7109177081566022342
 GameObject:
   m_ObjectHideFlags: 0
