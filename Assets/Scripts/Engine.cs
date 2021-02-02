@@ -18,15 +18,25 @@ public class Engine : MonoBehaviour
     private bool m_startedSound;
     private CarController m_carController;
 
+    private AudioSource SetUpEngineAudioSource(AudioClip clip)
+    {
+        AudioSource source = gameObject.AddComponent<AudioSource>();
+        source.clip = clip;
+        source.volume = 0;
+        source.loop = true;
+
+        source.time = Random.Range(0f, clip.length);
+        source.Play();
+        source.minDistance = 5;
+        source.maxDistance = m_maxRolloffDistance;
+        source.dopplerLevel = 0;
+        return source;
+    }
+
     private void StartSound()
     {
-        // get the carcontroller ( this will not be null as we have require component)
         m_carController = GetComponent<CarController>();
-
-        // setup the simple audio source
         m_accel = SetUpEngineAudioSource(m_accelClip);
-
-        // flag that we have started the sounds playing
         m_startedSound = true;
     }
 
@@ -34,6 +44,55 @@ public class Engine : MonoBehaviour
     {
         Destroy(m_accel);
         m_startedSound = false;
+    }
+
+    // simple function to add a curved bias towards 1 
+    // for a value in the 0-1 range
+    private static float CurveFactor(float factor)
+    {
+        return 1 - (1 - factor) * (1 - factor);
+    }
+
+    // unclamped version of Lerp 
+    // to allow value to exceed the from-to range
+    private static float ULerp(float from, float to, float value)
+    {
+        return (1.0f - value) * from + value * to;
+    }
+
+    private void CalculateGearFactor()
+    {
+        float f = (1 / (float)m_carController.NumberOfGears);
+        // current speed within the current gear's range of speeds.
+        float targetGearFactor = Mathf.InverseLerp(f * m_carController.CurrentGear, f * (m_carController.CurrentGear + 1), Mathf.Abs(m_carController.CurrentSpeed / m_carController.TopSpeed));
+        // smooth toward 'target' gear factor so revs don't snap when changing gear.
+        m_gearFactor = Mathf.Lerp(m_gearFactor, targetGearFactor, Time.deltaTime * 5f);
+    }
+
+    private void CalculateRevs()
+    {
+        CalculateGearFactor();
+        float gearNumFactor = m_carController.CurrentGear / (float)m_carController.NumberOfGears;
+        float revsRangeMin = ULerp(0f, m_revRangeBoundary, CurveFactor(gearNumFactor));
+        float revsRangeMax = ULerp(m_revRangeBoundary, 1f, gearNumFactor);
+        m_carController.Revolutions = ULerp(revsRangeMin, revsRangeMax, m_gearFactor);
+    }
+
+    private void GearChanging()
+    {
+        float f = Mathf.Abs(m_carController.CurrentSpeed / m_carController.TopSpeed);
+        float upgearlimit = (1 / (float)m_carController.NumberOfGears) * (m_carController.CurrentGear + 1);
+        float downgearlimit = (1 / (float)m_carController.NumberOfGears) * m_carController.CurrentGear;
+
+        if (m_carController.CurrentGear > 0 && f < downgearlimit)
+        {
+            m_carController.CurrentGear--;
+        }
+
+        if (f > upgearlimit && (m_carController.CurrentGear < (m_carController.NumberOfGears - 1)))
+        {
+            m_carController.CurrentGear++;
+        }
     }
 
     // Update is called once per frame
@@ -70,72 +129,5 @@ public class Engine : MonoBehaviour
             m_accel.dopplerLevel = m_useDoppler ? m_dopplerLevel : 0;
             m_accel.volume = 1;
         }
-    }
-
-    // sets up and adds new audio source to the gane object
-    private AudioSource SetUpEngineAudioSource(AudioClip clip)
-    {
-        // create the new audio source component on the game object and set up its properties
-        AudioSource source = gameObject.AddComponent<AudioSource>();
-        source.clip = clip;
-        source.volume = 0;
-        source.loop = true;
-
-        // start the clip from a random point
-        source.time = Random.Range(0f, clip.length);
-        source.Play();
-        source.minDistance = 5;
-        source.maxDistance = m_maxRolloffDistance;
-        source.dopplerLevel = 0;
-        return source;
-    }
-
-    private void GearChanging()
-    {
-        float f = Mathf.Abs(m_carController.CurrentSpeed / m_carController.TopSpeed);
-        float upgearlimit = (1 / (float)m_carController.NumberOfGears) * (m_carController.CurrentGear + 1);
-        float downgearlimit = (1 / (float)m_carController.NumberOfGears) * m_carController.CurrentGear;
-
-        if (m_carController.CurrentGear > 0 && f < downgearlimit)
-        {
-            m_carController.CurrentGear--;
-        }
-
-        if (f > upgearlimit && (m_carController.CurrentGear < (m_carController.NumberOfGears - 1)))
-        {
-            m_carController.CurrentGear++;
-        }
-    }
-
-    // simple function to add a curved bias towards 1 for a value in the 0-1 range
-    private static float CurveFactor(float factor)
-    {
-        return 1 - (1 - factor) * (1 - factor);
-    }
-
-    // unclamped version of Lerp, to allow value to exceed the from-to range
-    private static float ULerp(float from, float to, float value)
-    {
-        return (1.0f - value) * from + value * to;
-    }
-
-    private void CalculateGearFactor()
-    {
-        float f = (1 / (float)m_carController.NumberOfGears);
-        // gear factor is a normalised representation of the current speed within the current gear's range of speeds.
-        // We smooth towards the 'target' gear factor, so that revs don't instantly snap up or down when changing gear.
-        var targetGearFactor = Mathf.InverseLerp(f * m_carController.CurrentGear, f * (m_carController.CurrentGear + 1), Mathf.Abs(m_carController.CurrentSpeed / m_carController.TopSpeed));
-        m_gearFactor = Mathf.Lerp(m_gearFactor, targetGearFactor, Time.deltaTime * 5f);
-    }
-
-    private void CalculateRevs()
-    {
-        // calculate engine revs (for display / sound)
-        // (this is done in retrospect - revs are not used in force/power calculations)
-        CalculateGearFactor();
-        var gearNumFactor = m_carController.CurrentGear / (float)m_carController.NumberOfGears;
-        var revsRangeMin = ULerp(0f, m_revRangeBoundary, CurveFactor(gearNumFactor));
-        var revsRangeMax = ULerp(m_revRangeBoundary, 1f, gearNumFactor);
-        m_carController.Revolutions = ULerp(revsRangeMin, revsRangeMax, m_gearFactor);
     }
 }
