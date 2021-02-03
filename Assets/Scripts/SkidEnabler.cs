@@ -1,26 +1,29 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(WheelCollider))]
+[RequireComponent(typeof(WheelCollider)),
+ RequireComponent(typeof(AudioSource))]
 public class SkidEnabler : MonoBehaviour
 {
-
-    public float m_stiffnessThreshold = 1.0f;
+    public float m_slipLimit = 0.9f;
     public float m_placementOffset = 0.01f;
     private WheelCollider m_wheelCollider;
     private GameObject m_skidObject;
     private TrailRenderer m_renderer;
+    private AudioSource m_audioSource;
 
     void Awake()
     {
         m_wheelCollider = GetComponent<WheelCollider>();
+        m_audioSource = GetComponent<AudioSource>();
     }
 
     void LateUpdate()
     {
-        WheelHit hit;
+        m_wheelCollider.GetGroundHit(out WheelHit hit);
+
         // verify that the wheel is "skidding"
-        if (m_wheelCollider.forwardFriction.stiffness < m_stiffnessThreshold &&
-            m_wheelCollider.GetGroundHit(out hit))
+        if (Mathf.Abs(hit.forwardSlip) > m_slipLimit ||
+            Mathf.Abs(hit.sidewaysSlip) > m_slipLimit)
         {
             // check for existing object
             if (m_skidObject == null)
@@ -35,6 +38,8 @@ public class SkidEnabler : MonoBehaviour
                 m_renderer = m_skidObject.GetComponent<TrailRenderer>();
                 // clear existing trails.
                 m_renderer.Clear();
+
+                m_audioSource.Play();
             }
 
             // continually update skid mark position to the point of contact
@@ -50,6 +55,8 @@ public class SkidEnabler : MonoBehaviour
                 PoolManager.Instance.PoolObject(m_skidObject, true);
                 m_skidObject = null;
                 m_renderer = null;
+
+                m_audioSource.Stop();
             }
         }
     }
