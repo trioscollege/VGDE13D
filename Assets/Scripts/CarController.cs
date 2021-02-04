@@ -1,330 +1,167 @@
-using UnityEngine;
-using System.Collections;
+﻿using UnityEngine;
 
-public class CarController : MonoBehaviour 
+[RequireComponent(typeof(Rigidbody))]
+public class CarController : MonoBehaviour
 {
-	public Transform waypointContainer;
-	public int numberOfGears;
-	public float topSpeed = 150;
-	public float maxReverseSpeed = -50;
-	public float maxBrakeTorque = 100;
-	public float maxTurnAngle = 10;
-	public float maxTorque = 10;
-	public float decelerationTorque = 30;
-	public Vector3 centerOfMassAdjustment = new Vector3(0f,-0.9f,0f);
-	public float spoilerRatio = 0.1f;
-	public float handbrakeForwardSlip = 0.04f;
-	public float handbrakeSidewaysSlip = 0.08f;
-	public float breakingDistance = 6f;
-	public float forwardOffset;
-	public float spacingDistance = 1f;
-	public float sideOffset;
-	public float cornerDistance = 9f;
-	public WheelCollider wheelFL;
-	public WheelCollider wheelFR;
-	public WheelCollider wheelBL;
-	public WheelCollider wheelBR;
-	public Transform wheelTransformFL;
-	public Transform wheelTransformFR;
-	public Transform wheelTransformBL;
-	public Transform wheelTransformBR;
-	public GameObject leftBrakeLight;
-	public GameObject rightBrakeLight;
-	public Texture2D idleLightTex;
-	public Texture2D brakeLightTex;
-	public Texture2D reverseLightTex;
-	
-	private bool applyHandbrake=false;
-	private float currentSpeed;
-	private float gearSpread;
-	private Rigidbody body;
-	private Transform[] waypoints;
-	private int currentWaypoint=0;
-	private float inputSteer;
-	private float inputTorque;
-	
-	void Start() {
-		//so we don't have to search every time.
-		body = GetComponent<Rigidbody>();
+    // properties
+    public float m_maxSpeed = 200.0f;
+    public float m_maxTorque = 2500.0f;
+    public float m_brakingTorque = 1875.0f;
+    public float m_maxSteerAngle = 45.0f;
+    public Vector3 m_centerOfMassOffset = new Vector3(0.0f, 0.3f, 0.6f);
+    public float m_spoilerRatio = 0.15f;
+    public float m_handbrakeForwardStiffness = 0.8f;
+    public float m_handbrakeSidewayStiffness = 0.4f;
+    public int m_numberOfGears = 5;
+    public float m_revolutionsBoundary = 1.0f;
 
-		//calculate the spread of top speed over the number of gears.
-		gearSpread = topSpeed / numberOfGears;
-		
-		//lower center of mass for roll-over resistance
-		body.centerOfMass += centerOfMassAdjustment;
-		
-		//get the waypoints from the track.
-		GetWaypoints();
-	}
-	
-	void SetSlipValues(float forward, float sideways) {
-		WheelFrictionCurve tempStruct = wheelBR.forwardFriction;
-		tempStruct.stiffness = forward;
-		wheelBR.forwardFriction = tempStruct;
-		tempStruct = wheelBR.sidewaysFriction;
-		tempStruct.stiffness = sideways;
-		wheelBR.sidewaysFriction = tempStruct;
-		
-		tempStruct = wheelBL.forwardFriction;
-		tempStruct.stiffness = forward;
-		wheelBL.forwardFriction = tempStruct;
-		tempStruct = wheelBL.sidewaysFriction;
-		tempStruct.stiffness = sideways;
-		wheelBL.sidewaysFriction = tempStruct;
-	}
-	
-	// FixedUpdate is called once per physics frame
-	void FixedUpdate() {
-		//calculate turn angle
-		Vector3 RelativeWaypointPosition = transform.InverseTransformPoint(new Vector3( waypoints[currentWaypoint].position.x, transform.position.y, waypoints[currentWaypoint].position.z ) );
-		inputSteer = RelativeWaypointPosition.x / RelativeWaypointPosition.magnitude;
-		inputSteer += CheckSpacing();
-		inputSteer += CheckOnComing();
-		
-		//Spoilers add down pressure based on the car’s speed. (Upside-down lift)
-		Vector3 localVelocity = transform.InverseTransformDirection(body.velocity);
-		body.AddForce(-transform.up * (localVelocity.z * spoilerRatio),ForceMode.Impulse);
-		
-		//calculate torque.		
-		if ( Mathf.Abs( inputSteer ) < 0.5f ) {
-			//when making minor turning adjustments speed is based on how far to the next point.
-			inputTorque = (RelativeWaypointPosition.z / RelativeWaypointPosition.magnitude);
-			applyHandbrake = false;	
-		} else {
-			//we need to make a hard turn, if moving fast apply handbrake to slide.
-			if(body.velocity.magnitude > 10) {
-				applyHandbrake = true;
-			} else if(localVelocity.z < 0) {	//if not moving forward backup and turn opposite.
-				applyHandbrake = false;
-				inputTorque = -1;
-				inputSteer *= -1;
-			} else {	//let off the gas while making a hard turn.
-				applyHandbrake = false;
-				inputTorque = 0;
-			}
-		}
+    protected float m_appliedBrakeTorque = 0.0f;
+    protected bool m_handBraking = false;
+    protected bool m_braking = false;
+    protected bool m_reversing = false;
+    protected int m_currentGear = 1;
 
-		//set slip values
-		if(applyHandbrake) {
-			SetSlipValues(handbrakeForwardSlip, handbrakeSidewaysSlip);
-		} else {
-			SetSlipValues(1f, 1f);
-		}
-		
-		//if close enough, change waypoints.
-		if ( RelativeWaypointPosition.magnitude < 25 ) {
- 			currentWaypoint ++;
+    public float AccelerationInput { get; protected set; }
+    public float CurrentSpeed { get; protected set; }
+    public float TopSpeed { get { return m_maxSpeed; } }
+    public int NumberOfGears { get { return m_numberOfGears; } }
+    public int CurrentGear { get { return m_currentGear; } set { m_currentGear = value; } }
+    public float Revolutions { get; set; }
 
-			if ( currentWaypoint >= waypoints.Length ) {
- 				currentWaypoint = 0;
- 			}
-		}
-		
-		//front wheel steering
-		wheelFL.steerAngle = inputSteer * maxTurnAngle;
-		wheelFR.steerAngle = inputSteer * maxTurnAngle;
-		
-		//calculate max speed in KM/H (optimized calc)
-		currentSpeed = wheelBL.radius*wheelBL.rpm*Mathf.PI*0.12f;
-		if(currentSpeed < topSpeed && currentSpeed > maxReverseSpeed) {
-			//check for cars infront
-			float adjustment = ForwardRayCast();
-			
-			//rear wheel drive.
-			wheelBL.motorTorque = adjustment * inputTorque * maxTorque;
-			wheelBR.motorTorque = adjustment * inputTorque * maxTorque;
-		} else {
-			//can't go faster, already at top speed that engine produces.
-			wheelBL.motorTorque = 0;
-			wheelBR.motorTorque = 0;
-		}
-	}
-	
-	void UpdateWheelPositions() {
-		//move wheels based on their suspension.
-		WheelHit contact = new WheelHit();
-		if(wheelFL.GetGroundHit(out contact)) {
-			Vector3 temp = wheelFL.transform.position;
-			temp.y = (contact.point + (wheelFL.transform.up*wheelFL.radius)).y;
-			wheelTransformFL.position = temp;
-		}
+    // containers
+    public GameObject m_colliderContainer;
+    public GameObject m_meshContainer;
+    public GameObject m_brakeLightsContainer;
 
-		if(wheelFR.GetGroundHit(out contact)) {
-			Vector3 temp = wheelFR.transform.position;
-			temp.y = (contact.point + (wheelFR.transform.up*wheelFR.radius)).y;
-			wheelTransformFR.position = temp;
-		}
+    // car parts
+    protected WheelCollider[] m_wheelColliders;
+    protected Rigidbody m_body;
+    protected Transform[] m_wheelMeshes;
+    protected Renderer[] m_brakeLightRenderers;
 
-		if(wheelBL.GetGroundHit(out contact)) {
-			Vector3 temp = wheelBL.transform.position;
-			temp.y = (contact.point + (wheelBL.transform.up*wheelBL.radius)).y;
-			wheelTransformBL.position = temp;
-		}
+    protected Texture2D m_lightsIdleTex;
+    protected Texture2D m_lightsBrakeTex;
+    protected Texture2D m_lightsReverseTex;
 
-		if(wheelBR.GetGroundHit(out contact)) {
-			Vector3 temp = wheelBR.transform.position;
-			temp.y = (contact.point + (wheelBR.transform.up*wheelBR.radius)).y;
-			wheelTransformBR.position = temp;
-		}
-	}
-	
-	void Update() {
-		//rotate the wheels based on RPM
-		float rotationThisFrame = 360*Time.deltaTime;
-		wheelTransformFL.Rotate(wheelFL.rpm/rotationThisFrame,0,0);
-		wheelTransformFR.Rotate(wheelFR.rpm/rotationThisFrame,0,0);
-		wheelTransformBL.Rotate(wheelBL.rpm/rotationThisFrame,0,0);
-		wheelTransformBR.Rotate(wheelBR.rpm/rotationThisFrame,0,0);
-		
-		//turn the wheels according to steering. But make sure you take into account the rotation being applied above.
-		wheelTransformFL.localEulerAngles = new Vector3(wheelTransformFL.localEulerAngles.x, wheelFL.steerAngle - wheelTransformFL.localEulerAngles.z, wheelTransformFL.localEulerAngles.z);
-		wheelTransformFR.localEulerAngles = new Vector3(wheelTransformFR.localEulerAngles.x, wheelFR.steerAngle - wheelTransformFR.localEulerAngles.z, wheelTransformFR.localEulerAngles.z);
-		
-		//Adjust the wheels heights based on the suspension.
-		UpdateWheelPositions();
-		
-		//Determine what texture to use on our brake lights right now.
-		DetermineBreakLightState();
-		
-		//adjust engine sound
-		EngineSound();
-	}
-	
-	void DetermineBreakLightState() {
-		if((currentSpeed > 0 && inputTorque < 0) 
-			|| (currentSpeed < 0 && inputTorque > 0)
-			|| applyHandbrake) {
-			leftBrakeLight.GetComponent<Renderer>().material.mainTexture = brakeLightTex;
-			Light leftLight = leftBrakeLight.GetComponentInChildren<Light>();
-			leftLight.color = Color.red;
-			leftLight.intensity = 1;
-			rightBrakeLight.GetComponent<Renderer>().material.mainTexture = brakeLightTex;
-			Light rightLight = rightBrakeLight.GetComponentInChildren<Light>();
-			rightLight.color = Color.red;
-			rightLight.intensity = 1;
-		} else if(currentSpeed < 0 && inputTorque < 0) {
-			leftBrakeLight.GetComponent<Renderer>().material.mainTexture = reverseLightTex;
-			Light leftLight = leftBrakeLight.GetComponentInChildren<Light>();
-			leftLight.color = Color.white;
-			leftLight.intensity = 1;
-			rightBrakeLight.GetComponent<Renderer>().material.mainTexture = reverseLightTex;
-			Light rightLight = rightBrakeLight.GetComponentInChildren<Light>();
-			rightLight.color = Color.white;
-			rightLight.intensity = 1;
-		} else {
-			leftBrakeLight.GetComponent<Renderer>().material.mainTexture = idleLightTex;
-			Light leftLight = leftBrakeLight.GetComponentInChildren<Light>();
-			leftLight.color = Color.white;
-			leftLight.intensity = 0;
-			rightBrakeLight.GetComponent<Renderer>().material.mainTexture = idleLightTex;
-			Light rightLight = rightBrakeLight.GetComponentInChildren<Light>();
-			rightLight.color = Color.white;
-			rightLight.intensity = 0;
-		}
-	}
-	
-	void EngineSound() {
-		//going forward calculate how far along that gear we are and the pitch sound.
-		if(currentSpeed > 0) {
-			if(currentSpeed > topSpeed) {
-				GetComponent<AudioSource>().pitch = 1.75f;
-			} else {
-				GetComponent<AudioSource>().pitch = ((currentSpeed % gearSpread) / gearSpread) + 0.75f;
-			}
-		} else { //when reversing we have only one gear.
-			GetComponent<AudioSource>().pitch = (currentSpeed / maxReverseSpeed) + 0.75f;
-		}
-	}
-	
-	void GetWaypoints() {
-		//NOTE: Unity named this function poorly it also returns the parent’s component.
-		Transform[] potentialWaypoints = waypointContainer.GetComponentsInChildren<Transform>();
-		
-		//initialize the waypoints array so that is has enough space to store the nodes.
-		waypoints = new Transform[ (potentialWaypoints.Length - 1) ];
-		
-		//loop through the list and copy the nodes into the array.
-    	//start at 1 instead of 0 to skip the WaypointContainer’s transform.
-		for (int i = 1; i < potentialWaypoints.Length; ++i ) {
- 			waypoints[ i-1 ] = potentialWaypoints[i];
-		}
-	}
-	
-	public Transform GetCurrentWaypoint() {
-		return waypoints[currentWaypoint];	
-	}
-	
-	public Transform GetLastWaypoint() {
-		if(currentWaypoint - 1 < 0) {
-			return waypoints[waypoints.Length - 1];
-		}
-		
-		return waypoints[currentWaypoint - 1];
-	}
-	
-	private float ForwardRayCast() {
-		RaycastHit hit;
-		Vector3 carFront = transform.position + (transform.forward * forwardOffset);
-		Debug.DrawRay(carFront, transform.forward * breakingDistance);
-		
-		//if we detect a car infront of us, slow down or even reverse based on distance.
-		if(Physics.Raycast(carFront, transform.forward, out hit, breakingDistance)) {
-			return (((carFront - hit.point).magnitude / breakingDistance) * 2 ) - 1;
-		}
-		
-		//otherwise no change
-		return 1f;
-	}
-	
-	private float CheckSpacing() {
-		float steeringAdjustment=0;
-		
-		//check to our right
-		RaycastHit hit;
-		Vector3 carRight = transform.position + (transform.right * sideOffset);
-		Debug.DrawRay(carRight, transform.right * spacingDistance);
-		
-		//if we detect a car to the right turn left.
-		if(Physics.Raycast(carRight, transform.right, out hit, spacingDistance)) {
-			steeringAdjustment += -1 + ((carRight - hit.point).magnitude / spacingDistance);
-		}
-		
-		//check to our left
-		Vector3 carLeft = transform.position + (-transform.right * sideOffset);
-		Debug.DrawRay(carLeft, -transform.right * spacingDistance);
-		
-		//if we detect a car to the left turn right.
-		if(Physics.Raycast(carLeft, -transform.right, out hit, spacingDistance)) {
-			steeringAdjustment += 1 - ((carLeft - hit.point).magnitude / spacingDistance);
-		}
-		
-		//otherwise no change
-		return steeringAdjustment;
-	}
-	
-	private float CheckOnComing() {
-		float steeringAdjustment=0;
-		
-		//check to our right
-		RaycastHit hit;
-		Vector3 carFrontRight = transform.position + (transform.right * sideOffset) + (transform.forward * forwardOffset);
-		Debug.DrawRay(carFrontRight, (transform.right*0.5f + transform.forward) * cornerDistance);
-		
-		//if we detect a car to the right turn left.
-		if(Physics.Raycast(carFrontRight, (transform.right*0.5f + transform.forward), out hit, cornerDistance)) {
-			steeringAdjustment += -1 + ((carFrontRight - hit.point).magnitude / cornerDistance);
-		}
-		
-		//check to our left
-		Vector3 carFrontLeft = transform.position + (-transform.right * sideOffset) + (transform.forward * forwardOffset);;
-		Debug.DrawRay(carFrontLeft, (-transform.right*0.5f + transform.forward) * cornerDistance);
-		
-		//if we detect a car to the left turn right.
-		if(Physics.Raycast(carFrontLeft, (-transform.right*0.5f + transform.forward), out hit, cornerDistance)) {
-			steeringAdjustment += 1 - ((carFrontLeft - hit.point).magnitude / cornerDistance);
-		}
-		
-		//otherwise no change
-		return steeringAdjustment;
-	}
+    private void Awake()
+    {
+        GetWheelColliders();
+        GetWheelMeshes();
+        GetBrakeLightRenderers();
+        LoadBrakeTextures();
+
+        // offset center of mass for roll-over resistance
+        m_body = GetComponent<Rigidbody>();
+        m_body.centerOfMass += m_centerOfMassOffset;
+    }
+
+    protected void Update()
+    {
+        for (int i = 0; i < m_wheelMeshes.Length; i++)
+        {
+            float rotationThisFrame = m_wheelColliders[i].rpm * Time.deltaTime * 6.0f;
+            m_wheelMeshes[i].Rotate(rotationThisFrame, 0, 0);
+        }
+
+        // front tires only, indicies 0 and 1
+        for (int i = 0; i < 2; i++)
+        {
+            m_wheelMeshes[i].localEulerAngles = new Vector3(m_wheelMeshes[i].localEulerAngles.x,
+                                                            m_wheelColliders[i].steerAngle - m_wheelMeshes[i].localEulerAngles.z,
+                                                            m_wheelMeshes[i].localEulerAngles.z);
+        }
+
+        UpdateWheelPositions();
+        UpdateBrakeLightState();
+    }
+
+    protected void SetStiffness(float foreSlip, float sideSlip)
+    {
+        // rear wheels only, start at index 2
+        for (int i = 2; i < m_wheelColliders.Length; i++)
+        {
+            WheelCollider wc = m_wheelColliders[i];
+            WheelFrictionCurve frictionCurve = wc.forwardFriction;
+            frictionCurve.stiffness = foreSlip;
+            wc.forwardFriction = frictionCurve;
+
+            frictionCurve = wc.sidewaysFriction;
+            frictionCurve.stiffness = sideSlip;
+            wc.sidewaysFriction = frictionCurve;
+        }
+    }
+
+
+    private void GetWheelColliders()
+    {
+        m_wheelColliders = new WheelCollider[4];
+        WheelCollider[] m_children = m_colliderContainer.GetComponentsInChildren<WheelCollider>();
+        for (int i = 0; i < m_children.Length; i++)
+        {
+            m_wheelColliders[i] = m_children[i];
+        }
+    }
+
+    private void GetWheelMeshes()
+    {
+        m_wheelMeshes = new Transform[4];
+        Transform[] m_children = m_meshContainer.GetComponentsInChildren<Transform>();
+        for (int i = 1; i < m_children.Length; i++) // i = 1 to ignore parent transform
+        {
+            m_wheelMeshes[i - 1] = m_children[i];
+        }
+    }
+
+    private void UpdateWheelPositions()
+    {
+        WheelHit contact = new WheelHit();
+
+        for (int i = 0; i < m_wheelMeshes.Length; i++)
+        {
+            if (m_wheelColliders[i].GetGroundHit(out contact))
+            {
+                Vector3 tempPos = m_wheelColliders[i].transform.position;
+                // translate the position up from the point of contact, using collider radius for scaling
+                tempPos.y = (contact.point + (m_wheelColliders[i].transform.up * m_wheelColliders[i].radius)).y;
+                m_wheelMeshes[i].position = tempPos;
+            }
+        }
+    }
+
+    private void UpdateBrakeLightState()
+    {
+        if (m_braking || m_handBraking)
+        {
+            foreach (Renderer r in m_brakeLightRenderers)
+            {
+                r.material.mainTexture = m_lightsBrakeTex;
+            }
+        }
+        else if (m_reversing)
+        {
+            foreach (Renderer r in m_brakeLightRenderers)
+            {
+                r.material.mainTexture = m_lightsReverseTex;
+            }
+        }
+        else
+        {
+            foreach (Renderer r in m_brakeLightRenderers)
+            {
+                r.material.mainTexture = m_lightsIdleTex;
+            }
+        }
+    }
+
+    private void GetBrakeLightRenderers()
+    {
+        m_brakeLightRenderers = m_brakeLightsContainer.GetComponentsInChildren<Renderer>();
+    }
+
+    private void LoadBrakeTextures()
+    {
+        m_lightsIdleTex = Resources.Load<Texture2D>("Vehicle/LightsIdle");
+        m_lightsBrakeTex = Resources.Load<Texture2D>("Vehicle/LightsBrake");
+        m_lightsReverseTex = Resources.Load<Texture2D>("Vehicle/LightsReverse");
+    }
 }
