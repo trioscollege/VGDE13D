@@ -55,5 +55,4 @@ public class ChaseCamera : MonoBehaviour
         // Make sure the camera is looking at the chase target
         transform.LookAt(m_chaseTarget);
     }
-
 }

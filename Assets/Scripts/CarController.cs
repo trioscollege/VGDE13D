@@ -6,9 +6,9 @@ public class CarController : MonoBehaviour
     // properties
     public float m_maxSpeed = 200.0f;
     public float m_maxTorque = 2500.0f;
-    public float m_brakingTorque = 1875.0f;
+    public float m_brakingTorque = 2000.0f;
     public float m_maxSteerAngle = 45.0f;
-    public Vector3 m_centerOfMassOffset = new Vector3(0.0f, 0.3f, 0.6f);
+    public Vector3 m_centerOfMassOffset = new Vector3(0.0f, 0.0f, 0.0f);
     public float m_spoilerRatio = 0.15f;
     public float m_handbrakeForwardStiffness = 0.8f;
     public float m_handbrakeSidewayStiffness = 0.4f;
@@ -22,6 +22,7 @@ public class CarController : MonoBehaviour
     protected int m_currentGear = 1;
 
     public float AccelerationInput { get; protected set; }
+    public float SteeringInput { get; protected set; }
     public float CurrentSpeed { get; protected set; }
     public float TopSpeed { get { return m_maxSpeed; } }
     public int NumberOfGears { get { return m_numberOfGears; } }
@@ -43,7 +44,7 @@ public class CarController : MonoBehaviour
     protected Texture2D m_lightsBrakeTex;
     protected Texture2D m_lightsReverseTex;
 
-    private void Awake()
+    void Awake()
     {
         GetWheelColliders();
         GetWheelMeshes();

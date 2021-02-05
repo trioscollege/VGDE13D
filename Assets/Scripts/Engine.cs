@@ -11,6 +11,7 @@ public class Engine : MonoBehaviour
     public float m_maxRolloffDistance = 500;
     public float m_dopplerLevel = 1;
     public bool m_useDoppler = true;
+    public bool m_is3DSound = true;
 
     public float m_revRangeBoundary = 1.0f;
     private float m_gearFactor;
@@ -30,6 +31,7 @@ public class Engine : MonoBehaviour
         source.minDistance = 5;
         source.maxDistance = m_maxRolloffDistance;
         source.dopplerLevel = 0;
+        source.spatialBlend = m_is3DSound ? 1.0f : 0.0f;
         return source;
     }
 
@@ -96,7 +98,7 @@ public class Engine : MonoBehaviour
     }
 
     // Update is called once per frame
-    private void Update()
+    void Update()
     {
         // get the distance to main camera
         float camDist = (Camera.main.transform.position - transform.position).sqrMagnitude;
