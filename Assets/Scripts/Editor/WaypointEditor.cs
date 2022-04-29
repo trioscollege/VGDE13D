@@ -8,14 +8,12 @@ public class WaypointEditor : Editor
     {
         base.OnInspectorGUI();
 
-        if (GUILayout.Button("Flatten Waypoints"))
-        {
+        if (GUILayout.Button("Flatten Waypoints")) {
             WaypointGizmos wg = target as WaypointGizmos;
             GameObject go = wg.gameObject;
             Transform[] waypoints = go.GetComponentsInChildren<Transform>();
 
-            for (int i = 1; i < waypoints.Length; ++i)
-            {
+            for (int i = 1; i < waypoints.Length; ++i) {
                 Physics.Raycast(
                     new Ray(
                         waypoints[i].position + Vector3.up * 10000f,
