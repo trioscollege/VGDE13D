@@ -5,9 +5,11 @@ using UnityEngine.SceneManagement;
 public class RaceManager : MonoBehaviour {
     public int requiredLaps = 3;
     public GameObject checkpointContainer;
+    public PlayerCar playerCar;
     public AICar[] aiCars;
     public float respawnDelay = 5f;
     public float distanceToCover = 1f;
+    private Rigidbody playerBody;
     private Rigidbody[] aiBodies;
     private float[] respawnCounters;
     private float[] distancesLeft;
@@ -36,6 +38,7 @@ public class RaceManager : MonoBehaviour {
         waypoints = new Transform[aiCars.Length];
         laps = new int[aiCars.Length];
 
+        playerBody = playerCar.GetComponent<Rigidbody>();
         for (int i = 0; i < aiCars.Length; i++) {
             aiBodies[i] = aiCars[i].gameObject.GetComponent<Rigidbody>();
             respawnCounters[i] = respawnDelay;
@@ -73,6 +76,14 @@ public class RaceManager : MonoBehaviour {
             if (laps[i] == requiredLaps) {
                 carsFinished += 1;
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.R)) {
+            playerBody.velocity = Vector3.zero;
+            Vector3 nextCheckpoint = checkpoints[currentCheckpoint].transform.position;
+            Vector3 lastCheckpoint = checkpoints[currentCheckpoint > 0 ? currentCheckpoint - 1 : checkpoints.Length - 1].transform.position;
+            playerBody.position = lastCheckpoint;
+            playerBody.rotation = Quaternion.LookRotation(nextCheckpoint - lastCheckpoint);
         }
 
         if (carsFinished == aiCars.Length || playerLaps >= requiredLaps) {
