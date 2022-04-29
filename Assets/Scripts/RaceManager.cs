@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class RaceManager : MonoBehaviour {
+    public int requiredLaps = 3;
+    public GameObject checkpointContainer;
     public AICar[] aiCars;
     public float respawnDelay = 5f;
     public float distanceToCover = 1f;
@@ -10,7 +12,10 @@ public class RaceManager : MonoBehaviour {
     private float[] respawnCounters;
     private float[] distancesLeft;
     private Transform[] waypoints;
+    private Checkpoint[] checkpoints;
     private int[] laps;
+    private int playerLaps = 0;
+    private int currentCheckpoint = 0;
 
     public static RaceManager Instance { get; private set; } = null;
 
@@ -37,9 +42,12 @@ public class RaceManager : MonoBehaviour {
             distancesLeft[i] = float.MaxValue;
             laps[i] = 0;
         }
+
+        checkpoints = checkpointContainer.GetComponentsInChildren<Checkpoint>();
     }
 
     void Update() {
+        int carsFinished = 0;
         for (int i = 0; i < aiBodies.Length; i++) {
             Transform nextWaypoint = aiCars[i].CurrentWaypoint;
             float distanceCovered = (nextWaypoint.position - aiBodies[i].position).magnitude;
@@ -62,9 +70,14 @@ public class RaceManager : MonoBehaviour {
                 }
             }
 
-            if (laps[i] == 3) {
-                SceneManager.LoadScene("Track1");
+            if (laps[i] == requiredLaps) {
+                carsFinished += 1;
             }
+        }
+
+        if (carsFinished == aiCars.Length || playerLaps >= requiredLaps) {
+            Debug.Log("Player placed " + (carsFinished + 1).ToString());
+            SceneManager.LoadScene("Track1");
         }
     }
 
@@ -72,6 +85,17 @@ public class RaceManager : MonoBehaviour {
         int i = Array.FindIndex(aiCars, element => element == car);
         if (i != -1) {
             laps[i] += 1;
+        }
+    }
+
+    public void PlayerCheckpoint(Checkpoint point) {
+        if (point == checkpoints[currentCheckpoint]) {
+            currentCheckpoint += 1;
+            Debug.Log("Player passed checkpoint " + currentCheckpoint.ToString());
+            if (currentCheckpoint == checkpoints.Length) {
+                currentCheckpoint = 0;
+                playerLaps += 1;
+            }
         }
     }
 }
