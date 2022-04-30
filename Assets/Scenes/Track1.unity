@@ -1570,6 +1570,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredLaps: 3
   checkpointContainer: {fileID: 112043380}
+  playerCar: {fileID: 1273419097}
   aiCars:
   - {fileID: 1027420064}
   - {fileID: 1573013845}
@@ -2687,6 +2688,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7109177081566022340, guid: 16e3cbe13d3eaac47bed01967ca4963a, type: 3}
   m_PrefabInstance: {fileID: 172912125}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1273419097 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5357859304123455207, guid: 16e3cbe13d3eaac47bed01967ca4963a, type: 3}
+  m_PrefabInstance: {fileID: 172912125}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1273419093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14b327aff4895db48a5b349d616290b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!81 &1273419099
 AudioListener:
   m_ObjectHideFlags: 0
